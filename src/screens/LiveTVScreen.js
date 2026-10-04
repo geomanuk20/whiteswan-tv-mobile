@@ -24,6 +24,7 @@ import {
   INSTAGRAM_PAGES,
 } from '../constants/channels';
 import { YouTubeVideoCard } from '../components/YouTubeVideoCard';
+import { MarketingPackagesSection } from '../components/MarketingPackagesSection';
 import { fetchLatestYouTubeVideos } from '../services/youtubeApi';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
@@ -460,6 +461,11 @@ export const LiveTVScreen = ({ navigation }) => {
             </View>
           )}
         </View>
+
+        {/* ========================================================================= */}
+        {/* MARKETING PACKAGES (ADVERTISING & PROMOTIONS)                             */}
+        {/* ========================================================================= */}
+        <MarketingPackagesSection />
 
         <View style={{ height: 28 }} />
       </ScrollView>
