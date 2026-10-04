@@ -21,20 +21,20 @@ import { useTheme } from '../context/ThemeContext';
 import { useBookmarks } from '../context/BookmarkContext';
 import { useAuth } from '../context/AuthContext';
 import { NewsCard } from '../components/NewsCard';
-import { fetchPostById, fetchPosts, fetchAuthorPosts } from '../services/wpApi';
+import { fetchPostById, fetchPostBySlug, fetchPosts, fetchAuthorPosts } from '../services/wpApi';
 import { shareArticleWithImage, shareToWhatsApp } from '../utils/shareHelper';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
 export const ArticleDetailScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
-  const { post: initialPost, postId } = route.params || {};
+  const { post: initialPost, postId, slug, postUrl } = route.params || {};
   const { colors, isDarkMode } = useTheme();
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { user, isLoggedIn } = useAuth();
   const { width } = useWindowDimensions();
 
   const targetPostId = initialPost?.id || (postId ? parseInt(postId, 10) : null);
-  const [post, setPost] = useState(initialPost || { id: targetPostId });
+  const [post, setPost] = useState(initialPost || (targetPostId ? { id: targetPostId } : null));
   const [loading, setLoading] = useState(!initialPost);
   const [fontSizeOffset, setFontSizeOffset] = useState(0); // -2, 0, +2, +4
   const [relatedPosts, setRelatedPosts] = useState([]);
@@ -52,21 +52,34 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
 
   // Fetch complete details, related posts, and author posts
   useEffect(() => {
-    if (targetPostId) {
+    if (targetPostId || slug || postUrl) {
       loadFullDetails();
     }
-  }, [targetPostId]);
+  }, [targetPostId, slug, postUrl]);
 
   const loadFullDetails = async () => {
     try {
       setLoading(true);
-      const fullPost = await fetchPostById(targetPostId);
+      let fullPost = null;
+      if (targetPostId) {
+        fullPost = await fetchPostById(targetPostId);
+      } else if (slug) {
+        fullPost = await fetchPostBySlug(slug);
+      } else if (postUrl) {
+        // Extract slug from URL
+        const clean = postUrl.split('?')[0].split('#')[0].replace(/\/+$/, '');
+        const extractedSlug = clean.split('/').pop();
+        if (extractedSlug) {
+          fullPost = await fetchPostBySlug(extractedSlug);
+        }
+      }
+
       if (fullPost) {
         setPost(fullPost);
       }
 
       const activeAuthorId = fullPost?.authorId || post?.authorId;
-      const catId = (fullPost?.categories || post.categories)?.[0]?.id || null;
+      const catId = (fullPost?.categories || post?.categories)?.[0]?.id || null;
 
       // Parallel fetch related posts and author posts
       const [relatedRes, authorRes] = await Promise.allSettled([
@@ -75,11 +88,11 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
       ]);
 
       if (relatedRes.status === 'fulfilled' && relatedRes.value?.posts) {
-        setRelatedPosts(relatedRes.value.posts.filter((p) => p.id !== post.id));
+        setRelatedPosts(relatedRes.value.posts.filter((p) => p.id !== (fullPost?.id || post?.id)));
       }
 
       if (authorRes.status === 'fulfilled' && authorRes.value?.posts) {
-        setAuthorPosts(authorRes.value.posts.filter((p) => p.id !== post.id).slice(0, 3));
+        setAuthorPosts(authorRes.value.posts.filter((p) => p.id !== (fullPost?.id || post?.id)).slice(0, 3));
       }
     } catch (e) {
       console.error('Error fetching full post:', e);

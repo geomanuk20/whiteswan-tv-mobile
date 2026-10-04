@@ -438,6 +438,33 @@ export const fetchPostById = async (id, { bypassCache = true } = {}) => {
 };
 
 /**
+ * Fetch a single post by slug with full details
+ */
+export const fetchPostBySlug = async (slug, { bypassCache = true } = {}) => {
+  if (!slug) return null;
+  try {
+    const cleanSlug = encodeURIComponent(String(slug).replace(/^\/+|\/+$/g, ''));
+    const ts = bypassCache ? `&_t=${Date.now()}` : '';
+    const response = await fetch(`${WP_BASE_URL}/posts?slug=${cleanSlug}&_embed=1${ts}`, {
+      headers: HEADERS,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load post by slug ${slug}: ${response.status}`);
+    }
+
+    const rawPosts = await response.json();
+    if (Array.isArray(rawPosts) && rawPosts.length > 0) {
+      return formatPost(rawPosts[0]);
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error fetching post by slug ${slug}:`, error);
+    return null;
+  }
+};
+
+/**
  * Helper: Check if post was published today (same calendar date or within 24 hours)
  */
 export const isPostFromToday = (dateString) => {
