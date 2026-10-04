@@ -1,20 +1,38 @@
+import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { BookmarkProvider } from './src/context/BookmarkContext';
+import { AuthProvider } from './src/context/AuthContext';
+import { NetworkProvider } from './src/context/NetworkContext';
+import { OfflineScreen } from './src/components/OfflineScreen';
+import { AppNavigator } from './src/navigation/AppNavigator';
 
-export default function App() {
+function AppContent() {
+  const { isDarkMode } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      <AppNavigator />
+      <OfflineScreen />
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <NetworkProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <BookmarkProvider>
+              <AppContent />
+            </BookmarkProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </NetworkProvider>
+    </SafeAreaProvider>
+  );
+}
+

@@ -1,24 +1,107 @@
 {
   "expo": {
-    "name": "whiteswan-app",
-    "slug": "whiteswan-app",
-    "version": "1.0.0",
+    "name": "Whiteswan TV News",
+    "slug": "whiteswan-tv-news",
+    "version": "1.0.17",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#000000",
+      "resizeMode": "contain"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.whiteswantv.news",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "phonepe",
+          "ppe",
+          "tez",
+          "paytmmp",
+          "upi",
+          "whatsapp",
+          "bhim",
+          "credpay",
+          "amazonpay",
+          "supermoney"
+        ]
+      }
     },
     "android": {
+      "package": "com.whiteswantv.news",
+      "versionCode": 19,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "upi"
+            },
+            {
+              "scheme": "phonepe"
+            },
+            {
+              "scheme": "ppe"
+            },
+            {
+              "scheme": "tez"
+            },
+            {
+              "scheme": "paytmmp"
+            },
+            {
+              "scheme": "bhim"
+            },
+            {
+              "scheme": "credpay"
+            },
+            {
+              "scheme": "amazonpay"
+            },
+            {
+              "scheme": "supermoney"
+            },
+            {
+              "scheme": "gpay"
+            },
+            {
+              "scheme": "paytm"
+            }
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
+      ]
+    ],
+    "owner": "geomanu",
+    "extra": {
+      "eas": {
+        "projectId": "ff4e4a8e-ebce-48d6-8aef-058ed01e5cec"
+      }
     }
   }
 }
