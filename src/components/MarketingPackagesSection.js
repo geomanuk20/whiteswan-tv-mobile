@@ -104,7 +104,7 @@ export const MarketingPackagesSection = ({ style }) => {
               </View>
             </View>
             <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-              മാർക്കറ്റിംഗ് & പരസ്യ പാക്കേജുകൾ
+              Website, App, YouTube & Social Ads
             </Text>
           </View>
         </View>
@@ -224,12 +224,9 @@ export const MarketingPackagesSection = ({ style }) => {
                   </View>
                 </View>
 
-                {/* Title & Malayalam */}
+                {/* Title */}
                 <Text style={[styles.packageTitle, { color: colors.text }]}>
                   {pkg.title}
-                </Text>
-                <Text style={[styles.packageTitleMl, { color: COLORS.primary }]}>
-                  {pkg.titleMl}
                 </Text>
 
                 {/* Description */}
