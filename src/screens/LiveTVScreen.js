@@ -25,6 +25,10 @@ import {
 } from '../constants/channels';
 import { YouTubeVideoCard } from '../components/YouTubeVideoCard';
 import { MarketingPackagesSection } from '../components/MarketingPackagesSection';
+import {
+  MARKETING_PACKAGES,
+  WHATSAPP_CONTACT_NUMBER,
+} from '../constants/marketingPackages';
 import { fetchLatestYouTubeVideos } from '../services/youtubeApi';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
@@ -155,7 +159,12 @@ export const LiveTVScreen = ({ navigation }) => {
         ]}
       >
         <View style={styles.headerTitleRow}>
-          <Text style={[styles.mainHeaderTitle, { color: colors.text }]}>Channels</Text>
+          <View style={styles.headerTitleContainer}>
+            <Text style={[styles.mainHeaderTitle, { color: colors.text }]}>Dashboard</Text>
+            <Text style={[styles.mainHeaderSub, { color: colors.textSecondary }]}>
+              മീഡിയ & മാർക്കറ്റിംഗ് ഡാഷ്‌ബോർഡ്
+            </Text>
+          </View>
           {navigation && (
             <TouchableOpacity
               style={[styles.headerIconButton, { backgroundColor: colors.inputBg }]}
@@ -185,6 +194,71 @@ export const LiveTVScreen = ({ navigation }) => {
           />
         }
       >
+        {/* Dashboard Hero Overview Card */}
+        <View
+          style={[
+            styles.dashboardHeroCard,
+            {
+              backgroundColor: isDarkMode ? '#1E293B' : '#0F172A',
+              borderColor: isDarkMode ? '#334155' : '#1E293B',
+            },
+          ]}
+        >
+          <View style={styles.dashboardHeroHeader}>
+            <View style={styles.dashboardHeroBadge}>
+              <View style={styles.pulseDot} />
+              <Text style={styles.dashboardHeroBadgeText}>LIVE MEDIA HUB</Text>
+            </View>
+            <Text style={styles.dashboardHeroTitle}>Whiteswan TV Dashboard</Text>
+            <Text style={styles.dashboardHeroSubtitle}>
+              Official Channels • Video Bulletins • Marketing Packages
+            </Text>
+          </View>
+
+          {/* Quick Metrics Grid */}
+          <View style={styles.dashboardStatsGrid}>
+            <View style={styles.dashboardStatBox}>
+              <Ionicons name="videocam" size={18} color="#EF4444" />
+              <Text style={styles.dashboardStatVal}>{videos.length > 0 ? videos.length : '4+'}</Text>
+              <Text style={styles.dashboardStatLabel}>Bulletins</Text>
+            </View>
+
+            <View style={styles.dashboardStatBox}>
+              <Ionicons name="globe-outline" size={18} color="#38BDF8" />
+              <Text style={styles.dashboardStatVal}>
+                {YOUTUBE_CHANNELS.length + FACEBOOK_PAGES.length + INSTAGRAM_PAGES.length}
+              </Text>
+              <Text style={styles.dashboardStatLabel}>Channels</Text>
+            </View>
+
+            <View style={styles.dashboardStatBox}>
+              <Ionicons name="megaphone" size={18} color="#F59E0B" />
+              <Text style={styles.dashboardStatVal}>{MARKETING_PACKAGES.length}</Text>
+              <Text style={styles.dashboardStatLabel}>Ad Plans</Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.dashboardStatBox, styles.dashboardStatBoxAction]}
+              onPress={() => Linking.openURL(`https://wa.me/${WHATSAPP_CONTACT_NUMBER}`)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="logo-whatsapp" size={18} color="#10B981" />
+              <Text style={[styles.dashboardStatVal, { color: '#34D399' }]}>Desk</Text>
+              <Text style={styles.dashboardStatLabel}>Contact</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Section Heading for Social Channels */}
+        <View style={styles.channelsSectionHeader}>
+          <Text style={[styles.channelsSectionHeading, { color: colors.text }]}>
+            Official Channels & Pages
+          </Text>
+          <Text style={[styles.channelsSectionSub, { color: colors.textSecondary }]}>
+            സോഷ്യൽ മീഡിയ ചാനലുകൾ
+          </Text>
+        </View>
+
         {SECTIONS.map((section) => {
           const isExpanded = expandedSection === section.key;
 
@@ -488,9 +562,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     marginBottom: 2,
   },
+  headerTitleContainer: {
+    flex: 1,
+  },
   mainHeaderTitle: {
     fontSize: 22,
     fontWeight: '800',
+  },
+  mainHeaderSub: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 1,
   },
   headerIconButton: {
     width: 36,
@@ -501,6 +583,102 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  dashboardHeroCard: {
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  dashboardHeroHeader: {
+    marginBottom: SPACING.sm + 2,
+  },
+  dashboardHeroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    marginBottom: 6,
+  },
+  pulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
+  },
+  dashboardHeroBadgeText: {
+    color: '#F87171',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  dashboardHeroTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+  dashboardHeroSubtitle: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  dashboardStatsGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 6,
+  },
+  dashboardStatBox: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: RADIUS.md,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  dashboardStatBoxAction: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  dashboardStatVal: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 3,
+  },
+  dashboardStatLabel: {
+    fontSize: 10,
+    color: '#94A3B8',
+    marginTop: 1,
+    fontWeight: '600',
+  },
+  channelsSectionHeader: {
+    marginBottom: SPACING.xs + 2,
+    marginTop: 2,
+  },
+  channelsSectionHeading: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  channelsSectionSub: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 1,
   },
   sectionWrapper: {
     marginBottom: SPACING.md,

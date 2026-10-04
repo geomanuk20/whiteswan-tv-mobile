@@ -72,11 +72,11 @@ const BottomTabNavigator = () => {
         name="LiveTV"
         component={LiveTVScreen}
         options={{
-          tabBarLabel: 'Channels',
+          tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'play-circle' : 'play-circle-outline'}
-              size={23}
+              name={focused ? 'apps' : 'apps-outline'}
+              size={22}
               color={color}
             />
           ),
