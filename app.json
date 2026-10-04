@@ -29,12 +29,17 @@
         ]
       }
     },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#00A3E8"
+    },
     "android": {
       "package": "com.whiteswantv.news",
       "versionCode": 21,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/android-icon-foreground.png"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
         "INTERNET",
@@ -93,7 +98,10 @@
       [
         "onesignal-expo-plugin",
         {
-          "mode": "development"
+          "mode": "development",
+          "smallIcons": [
+            "./assets/notification-icon.png"
+          ]
         }
       ]
     ],
