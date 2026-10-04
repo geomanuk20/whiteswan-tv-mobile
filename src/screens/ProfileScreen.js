@@ -1636,11 +1636,6 @@ export const ProfileScreen = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Marketing & Advertising Packages Section */}
-            <View style={styles.section}>
-              <MarketingPackagesSection style={{ marginTop: 0, marginBottom: 0 }} />
-            </View>
-
             {/* WordPress Website About Section */}
             <View style={styles.section}>
               <View style={[styles.aboutCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -1680,6 +1675,11 @@ export const ProfileScreen = ({ navigation }) => {
                   ))}
                 </View>
               </View>
+            </View>
+
+            {/* Marketing & Advertising Packages Section */}
+            <View style={styles.section}>
+              <MarketingPackagesSection style={{ marginTop: 0, marginBottom: 0 }} />
             </View>
 
             {/* App Info & Sign Out */}
