@@ -1,8 +1,26 @@
 import { Alert, Linking } from 'react-native';
-import { OneSignal, LogLevel } from 'react-native-onesignal';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 const ONESIGNAL_APP_ID =
   process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID || '87c5a74b-23bc-42f2-8c22-41135c83cbf1';
+
+// Detect if running in Expo Go client where custom native modules cannot be loaded
+const isExpoGo =
+  Constants.appOwnership === 'expo' ||
+  Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+let OneSignal = null;
+let LogLevel = null;
+
+if (!isExpoGo) {
+  try {
+    const oneSignalPkg = require('react-native-onesignal');
+    OneSignal = oneSignalPkg.OneSignal;
+    LogLevel = oneSignalPkg.LogLevel;
+  } catch (error) {
+    console.warn('[OneSignal] Native module not found in binary:', error?.message || error);
+  }
+}
 
 class NotificationService {
   static navigationRef = null;
@@ -16,6 +34,13 @@ class NotificationService {
   }
 
   /**
+   * Check if OneSignal native module is available
+   */
+  static isAvailable() {
+    return !isExpoGo && OneSignal !== null && typeof OneSignal?.initialize === 'function';
+  }
+
+  /**
    * Initialize OneSignal Push Notifications SDK
    */
   static async init(navigationRef = null) {
@@ -23,21 +48,41 @@ class NotificationService {
       this.navigationRef = navigationRef;
     }
 
+    if (!this.isAvailable()) {
+      console.log(
+        '[OneSignal] Running in Expo Go or environment without OneSignal native module. Native push is active in standalone APK / Development builds.'
+      );
+      return {
+        success: false,
+        cleanup: () => {},
+      };
+    }
+
     try {
       console.log('[OneSignal] Initializing OneSignal with App ID:', ONESIGNAL_APP_ID);
 
       // 1. Configure logging level
       try {
-        OneSignal.Debug.setLogLevel(LogLevel.Warn);
+        if (LogLevel?.Warn) {
+          OneSignal.Debug.setLogLevel(LogLevel.Warn);
+        }
       } catch (_) {}
 
       // 2. Initialize SDK
       OneSignal.initialize(ONESIGNAL_APP_ID);
 
-      // 3. Setup Push Subscription Observer & Verification Dialog
+      // 3. Prompt user for notification permission immediately and ensure opt-in
+      try {
+        OneSignal.Notifications.requestPermission(true);
+        OneSignal.User.pushSubscription.optIn();
+      } catch (e) {
+        console.warn('[OneSignal] Request permission init error:', e);
+      }
+
+      // 4. Setup Push Subscription Observer & Verification Dialog
       this.setupSubscriptionVerification();
 
-      // 4. Setup Notification Click & Foreground Event Listeners
+      // 5. Setup Notification Click & Foreground Event Listeners
       this.setupNotificationListeners();
 
       return {
@@ -47,7 +92,7 @@ class NotificationService {
         },
       };
     } catch (error) {
-      console.warn('[OneSignal] Init notice (e.g. running outside native build):', error?.message || error);
+      console.warn('[OneSignal] Initialization error:', error?.message || error);
       return {
         success: false,
         cleanup: () => {},
@@ -59,6 +104,8 @@ class NotificationService {
    * Monitor Push Subscription status and display verification dialog once server-assigned ID exists
    */
   static setupSubscriptionVerification() {
+    if (!this.isAvailable()) return;
+
     const checkAndShowDialog = (subscriptionId) => {
       if (this.hasShownVerificationDialog) return;
 
@@ -90,17 +137,19 @@ class NotificationService {
 
     try {
       // Evaluate immediate current state at registration time
-      const currentId = OneSignal.User.pushSubscription.id;
-      checkAndShowDialog(currentId);
+      const currentId = OneSignal.User?.pushSubscription?.id;
+      if (currentId) {
+        checkAndShowDialog(currentId);
+      }
 
       // Retain observer for subscription state changes
       this.pushSubscriptionObserver = (event) => {
         const currentSubscriptionId =
-          event?.current?.id || OneSignal.User.pushSubscription.id;
+          event?.current?.id || OneSignal.User?.pushSubscription?.id;
         checkAndShowDialog(currentSubscriptionId);
       };
 
-      OneSignal.User.pushSubscription.addEventListener(
+      OneSignal.User?.pushSubscription?.addEventListener(
         'change',
         this.pushSubscriptionObserver
       );
@@ -113,17 +162,19 @@ class NotificationService {
    * Setup click and foreground notification handlers
    */
   static setupNotificationListeners() {
+    if (!this.isAvailable()) return;
+
     try {
       this.clickListener = (event) => {
         console.log('[OneSignal] Notification clicked:', event);
         this.handleNotificationClick(event);
       };
-      OneSignal.Notifications.addEventListener('click', this.clickListener);
+      OneSignal.Notifications?.addEventListener('click', this.clickListener);
 
       this.foregroundListener = (event) => {
         console.log('[OneSignal] Foreground Notification:', event);
       };
-      OneSignal.Notifications.addEventListener(
+      OneSignal.Notifications?.addEventListener(
         'foregroundWillDisplay',
         this.foregroundListener
       );
@@ -136,6 +187,7 @@ class NotificationService {
    * Request Notification Permissions (Android 13+ & iOS)
    */
   static async requestPermission(fallbackToSettings = true) {
+    if (!this.isAvailable()) return false;
     try {
       return await OneSignal.Notifications.requestPermission(fallbackToSettings);
     } catch (error) {
@@ -148,6 +200,7 @@ class NotificationService {
    * User Identity Management
    */
   static login(externalId) {
+    if (!this.isAvailable()) return;
     try {
       if (externalId) {
         OneSignal.login(String(externalId));
@@ -158,6 +211,7 @@ class NotificationService {
   }
 
   static logout() {
+    if (!this.isAvailable()) return;
     try {
       OneSignal.logout();
     } catch (error) {
@@ -169,6 +223,7 @@ class NotificationService {
    * User Tags Management
    */
   static addTag(key, value) {
+    if (!this.isAvailable()) return;
     try {
       OneSignal.User.addTag(key, String(value));
     } catch (error) {
@@ -177,6 +232,7 @@ class NotificationService {
   }
 
   static addTags(tags) {
+    if (!this.isAvailable()) return;
     try {
       OneSignal.User.addTags(tags);
     } catch (error) {
@@ -185,6 +241,7 @@ class NotificationService {
   }
 
   static removeTag(key) {
+    if (!this.isAvailable()) return;
     try {
       OneSignal.User.removeTag(key);
     } catch (error) {
@@ -196,6 +253,7 @@ class NotificationService {
    * Email & SMS Subscription Management
    */
   static addEmail(email) {
+    if (!this.isAvailable()) return;
     try {
       if (email) {
         OneSignal.User.addEmail(email);
@@ -206,6 +264,7 @@ class NotificationService {
   }
 
   static removeEmail(email) {
+    if (!this.isAvailable()) return;
     try {
       if (email) {
         OneSignal.User.removeEmail(email);
@@ -216,6 +275,7 @@ class NotificationService {
   }
 
   static addSms(number) {
+    if (!this.isAvailable()) return;
     try {
       if (number) {
         OneSignal.User.addSms(number);
@@ -226,6 +286,7 @@ class NotificationService {
   }
 
   static removeSms(number) {
+    if (!this.isAvailable()) return;
     try {
       if (number) {
         OneSignal.User.removeSms(number);
@@ -239,14 +300,16 @@ class NotificationService {
    * Push Subscription Status
    */
   static getPushSubscriptionId() {
+    if (!this.isAvailable()) return null;
     try {
-      return OneSignal.User.pushSubscription.id;
+      return OneSignal.User?.pushSubscription?.id;
     } catch (error) {
       return null;
     }
   }
 
   static async getOptedInAsync() {
+    if (!this.isAvailable()) return false;
     try {
       return await OneSignal.User.pushSubscription.getOptedInAsync();
     } catch (error) {
@@ -255,6 +318,7 @@ class NotificationService {
   }
 
   static optIn() {
+    if (!this.isAvailable()) return;
     try {
       OneSignal.User.pushSubscription.optIn();
     } catch (error) {
@@ -263,6 +327,7 @@ class NotificationService {
   }
 
   static optOut() {
+    if (!this.isAvailable()) return;
     try {
       OneSignal.User.pushSubscription.optOut();
     } catch (error) {
@@ -311,20 +376,21 @@ class NotificationService {
    * Cleanup listeners on unmount
    */
   static cleanup() {
+    if (!this.isAvailable()) return;
     try {
       if (this.pushSubscriptionObserver) {
-        OneSignal.User.pushSubscription.removeEventListener(
+        OneSignal.User?.pushSubscription?.removeEventListener(
           'change',
           this.pushSubscriptionObserver
         );
         this.pushSubscriptionObserver = null;
       }
       if (this.clickListener) {
-        OneSignal.Notifications.removeEventListener('click', this.clickListener);
+        OneSignal.Notifications?.removeEventListener('click', this.clickListener);
         this.clickListener = null;
       }
       if (this.foregroundListener) {
-        OneSignal.Notifications.removeEventListener(
+        OneSignal.Notifications?.removeEventListener(
           'foregroundWillDisplay',
           this.foregroundListener
         );
