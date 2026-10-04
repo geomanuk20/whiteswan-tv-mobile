@@ -1,13 +1,13 @@
 {
   "name": "whiteswan-tv-news",
-  "version": "1.0.0",
+  "version": "1.0.18",
   "author": "Geo Manu K",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
     "dev": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "build:apk": "npx eas build -p android --profile preview",
     "build:apk-local": "npx eas build -p android --profile preview --local",

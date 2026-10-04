@@ -63,8 +63,10 @@ class NotificationService {
 
       // 1. Configure logging level
       try {
-        if (LogLevel?.Warn) {
-          OneSignal.Debug.setLogLevel(LogLevel.Warn);
+        if (LogLevel?.Debug) {
+          OneSignal.Debug.setLogLevel(LogLevel.Debug);
+        } else if (LogLevel?.Verbose) {
+          OneSignal.Debug.setLogLevel(LogLevel.Verbose);
         }
       } catch (_) {}
 
@@ -101,12 +103,12 @@ class NotificationService {
   }
 
   /**
-   * Monitor Push Subscription status and display verification dialog once server-assigned ID exists
+   * Monitor Push Subscription status once server-assigned ID exists
    */
   static setupSubscriptionVerification() {
     if (!this.isAvailable()) return;
 
-    const checkAndShowDialog = (subscriptionId) => {
+    const checkAndLogSubscription = (subscriptionId) => {
       if (this.hasShownVerificationDialog) return;
 
       // Real server-assigned subscription ID must be non-empty and NOT start with "local-"
@@ -118,20 +120,6 @@ class NotificationService {
       ) {
         this.hasShownVerificationDialog = true;
         console.log('[OneSignal] Server-assigned push subscription ID confirmed:', subscriptionId);
-
-        Alert.alert(
-          'Your OneSignal SDK integration is complete!',
-          'You can now send Push Notifications & In-App Messages through OneSignal. Tap below to enable push notifications.',
-          [
-            {
-              text: 'Got it',
-              onPress: () => {
-                this.requestPermission(true);
-              },
-            },
-          ],
-          { cancelable: false }
-        );
       }
     };
 
@@ -139,14 +127,14 @@ class NotificationService {
       // Evaluate immediate current state at registration time
       const currentId = OneSignal.User?.pushSubscription?.id;
       if (currentId) {
-        checkAndShowDialog(currentId);
+        checkAndLogSubscription(currentId);
       }
 
       // Retain observer for subscription state changes
       this.pushSubscriptionObserver = (event) => {
         const currentSubscriptionId =
           event?.current?.id || OneSignal.User?.pushSubscription?.id;
-        checkAndShowDialog(currentSubscriptionId);
+        checkAndLogSubscription(currentSubscriptionId);
       };
 
       OneSignal.User?.pushSubscription?.addEventListener(
@@ -340,13 +328,24 @@ class NotificationService {
    */
   static handleNotificationClick(event) {
     const data = event?.notification?.additionalData || {};
-    const { postId, post_id, url, screen } = data;
-    const targetPostId = postId || post_id;
+    // Check various common WordPress OneSignal data keys
+    const rawPostId =
+      data.postId ||
+      data.post_id ||
+      data.id ||
+      data.article_id ||
+      data?.custom?.a?.post_id ||
+      data?.custom?.post_id;
+    const url = data.url || data.target_url || data.openURL || event?.notification?.launchURL;
+    const screen = data.screen;
 
     if (this.navigationRef?.isReady?.()) {
-      if (targetPostId) {
-        this.navigationRef.navigate('ArticleDetail', { postId: parseInt(targetPostId, 10) });
-        return;
+      if (rawPostId) {
+        const parsedId = parseInt(rawPostId, 10);
+        if (!isNaN(parsedId) && parsedId > 0) {
+          this.navigationRef.navigate('ArticleDetail', { postId: parsedId });
+          return;
+        }
       }
 
       if (screen === 'LiveTV') {
@@ -362,11 +361,10 @@ class NotificationService {
       }
     }
 
-    const launchUrl = url || event?.notification?.launchURL;
-    if (launchUrl) {
-      Linking.canOpenURL(launchUrl).then((supported) => {
+    if (url) {
+      Linking.canOpenURL(url).then((supported) => {
         if (supported) {
-          Linking.openURL(launchUrl);
+          Linking.openURL(url);
         }
       });
     }
