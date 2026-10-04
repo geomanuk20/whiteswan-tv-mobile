@@ -30,7 +30,7 @@
       }
     },
     "notification": {
-      "icon": "./assets/notification-icon.png",
+      "icon": "./assets/notification_icon.png",
       "color": "#00A3E8"
     },
     "android": {
@@ -100,7 +100,7 @@
         {
           "mode": "development",
           "smallIcons": [
-            "./assets/notification-icon.png"
+            "./assets/notification_icon.png"
           ]
         }
       ]
