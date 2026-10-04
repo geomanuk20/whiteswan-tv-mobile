@@ -17,7 +17,6 @@ import {
   MARKETING_PACKAGES,
   MARKETING_CATEGORIES,
   WHATSAPP_CONTACT_NUMBER,
-  MARKETING_CONTACT_PHONE,
 } from '../constants/marketingPackages';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
@@ -48,12 +47,6 @@ export const MarketingPackagesSection = ({ style }) => {
     const text = `Hi Whiteswan TV News Marketing Desk,\n\nI am interested in the "${pkg.title}" package.\n\n• Price: ${pkg.priceFormatted} (${pkg.duration})\n• Ad Format: ${pkg.adType}\n• Category: ${pkg.categoryName}\n\nPlease share more details and booking process.`;
     const url = `https://wa.me/${WHATSAPP_CONTACT_NUMBER}?text=${encodeURIComponent(text)}`;
     Linking.openURL(url).catch((err) => console.error('Failed to open WhatsApp:', err));
-  };
-
-  const handleCall = () => {
-    Linking.openURL(`tel:${MARKETING_CONTACT_PHONE}`).catch((err) =>
-      console.error('Failed to open phone dialer:', err)
-    );
   };
 
   const isTablet = width >= 768;
@@ -137,20 +130,9 @@ export const MarketingPackagesSection = ({ style }) => {
       {/* Expanded Content Only When Clicked */}
       {isExpanded && (
         <View style={styles.expandedBody}>
-          {/* Action Row: Description + Quick Call Desk */}
-          <View style={styles.actionRow}>
-            <Text style={[styles.description, { color: colors.textSecondary }]}>
-              Promote your business across Whiteswan TV News portal, Mobile App, YouTube, and Social channels.
-            </Text>
-            <TouchableOpacity
-              style={styles.quickCallBtn}
-              onPress={handleCall}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="call" size={13} color="#FFFFFF" />
-              <Text style={styles.quickCallText}>Call Desk</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={[styles.description, { color: colors.textSecondary }]}>
+            Promote your business across Whiteswan TV News portal, Mobile App, YouTube, and Social channels.
+          </Text>
 
           {/* Category Pills */}
           <ScrollView
@@ -350,31 +332,10 @@ const styles = StyleSheet.create({
   expandedBody: {
     marginTop: SPACING.md,
   },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: SPACING.sm,
-  },
   description: {
     fontSize: 12,
     lineHeight: 17,
-    flex: 1,
-  },
-  quickCallBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#059669',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: RADIUS.full,
-  },
-  quickCallText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
+    marginBottom: SPACING.sm,
   },
   categoriesContainer: {
     gap: 8,
