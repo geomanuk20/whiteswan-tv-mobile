@@ -26,6 +26,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
 import { NewsletterPopup } from '../components/NewsletterPopup';
+import { MarketingPackagesSection } from '../components/MarketingPackagesSection';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import {
   INDIAN_STATES,
@@ -1633,6 +1634,11 @@ export const ProfileScreen = ({ navigation }) => {
                   <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} style={{ marginRight: 6 }} />
                 </TouchableOpacity>
               </View>
+            </View>
+
+            {/* Marketing & Advertising Packages Section */}
+            <View style={styles.section}>
+              <MarketingPackagesSection style={{ marginTop: 0, marginBottom: 0 }} />
             </View>
 
             {/* WordPress Website About Section */}
