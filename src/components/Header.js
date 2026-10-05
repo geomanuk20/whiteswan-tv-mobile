@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +12,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode, toggleTheme, colors } = useTheme();
   const { user, isLoggedIn } = useAuth();
   const [imgError, setImgError] = React.useState(false);
 
@@ -21,8 +21,8 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   }, [user?.avatar]);
 
   const isSmall = width < 360;
-  const logoWidth = isSmall ? 108 : width > 600 ? 150 : 124;
-  const logoHeight = isSmall ? 30 : width > 600 ? 40 : 34;
+  const logoWidth = isSmall ? 100 : width > 600 ? 145 : 120;
+  const logoHeight = isSmall ? 28 : width > 600 ? 38 : 32;
 
   const handleAccountPress = () => {
     if (onProfilePress) {
@@ -53,21 +53,22 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
       <LinearGradient
         colors={
           isDarkMode
-            ? ['rgba(10, 20, 45, 0.70)', 'rgba(5, 12, 28, 0.88)']
-            : ['rgba(0, 40, 90, 0.40)', 'rgba(0, 20, 50, 0.65)']
+            ? ['rgba(4, 12, 28, 0.78)', 'rgba(2, 20, 52, 0.92)']
+            : ['rgba(3, 24, 68, 0.72)', 'rgba(2, 42, 98, 0.88)']
         }
         start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 1 }}
         style={[
           styles.overlay,
           {
-            paddingTop: Math.max(insets.top, 10) + 4,
+            paddingTop: Math.max(insets.top, 12) + 4,
           },
         ]}
       >
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
         <View style={styles.topRow}>
-          {/* Official Brand Logo on Crisp White Badge */}
-          <View style={styles.brandBadge}>
+          {/* Official Brand Logo with Crisp White Glass Pill Container */}
+          <View style={styles.brandLogoCard}>
             <Image
               source={require('../../assets/logo.png')}
               style={{ width: logoWidth, height: logoHeight }}
@@ -84,7 +85,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
                 activeOpacity={0.85}
               >
                 <LinearGradient
-                  colors={['#00C4FF', '#0077B6']}
+                  colors={['#00A3E8', '#0077B6']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.vipBadgeButton}
@@ -99,12 +100,12 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
                 activeOpacity={0.85}
               >
                 <LinearGradient
-                  colors={['#00C4FF', '#0284C7']}
+                  colors={['#00A3E8', '#0284C7']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.subscribeIconButton}
                 >
-                  <Ionicons name="diamond-outline" size={13} color="#FFFFFF" />
+                  <Ionicons name="diamond" size={13} color="#FFFFFF" />
                   <Text style={styles.subscribeIconText}>Premium</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -113,7 +114,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
             {/* Search Button */}
             {onSearchPress && (
               <TouchableOpacity
-                style={styles.glassButton}
+                style={styles.glassIconButton}
                 onPress={onSearchPress}
                 activeOpacity={0.7}
               >
@@ -123,7 +124,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
 
             {/* Account / Profile Button */}
             <TouchableOpacity
-              style={styles.glassButton}
+              style={styles.glassIconButton}
               onPress={handleAccountPress}
               activeOpacity={0.7}
             >
@@ -148,14 +149,14 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
 
             {/* Dark / Light Toggle */}
             <TouchableOpacity
-              style={styles.glassButton}
+              style={styles.glassIconButton}
               onPress={toggleTheme}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={isDarkMode ? 'sunny' : 'moon'}
                 size={18}
-                color={isDarkMode ? '#FDE047' : '#FFFFFF'}
+                color={isDarkMode ? '#FCD34D' : '#FFFFFF'}
               />
             </TouchableOpacity>
           </View>
@@ -173,26 +174,26 @@ const styles = StyleSheet.create({
   overlay: {
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.sm + 4,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 163, 232, 0.3)',
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(0, 163, 232, 0.35)',
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 46,
+    minHeight: 44,
   },
-  brandBadge: {
+  brandLogoCard: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: RADIUS.md,
+    paddingVertical: 4,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 3,
   },
   actions: {
@@ -203,11 +204,13 @@ const styles = StyleSheet.create({
   subscribeIconButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 11,
-    paddingVertical: 6.5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
     gap: 4,
-    shadowColor: '#00C4FF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    shadowColor: '#00A3E8',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.45,
     shadowRadius: 4,
@@ -216,19 +219,21 @@ const styles = StyleSheet.create({
   subscribeIconText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   vipBadgeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 11,
-    paddingVertical: 6.5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
     gap: 4,
-    shadowColor: '#00C4FF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    shadowColor: '#00A3E8',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.45,
     shadowRadius: 4,
     elevation: 4,
   },
@@ -238,18 +243,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.5,
   },
-  glassButton: {
+  glassIconButton: {
     width: 36,
     height: 36,
     borderRadius: RADIUS.full,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
+    borderColor: 'rgba(255, 255, 255, 0.38)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -257,6 +262,8 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
 });
 export default Header;
