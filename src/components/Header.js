@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +12,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
-  const { isDarkMode, toggleTheme, colors } = useTheme();
+  const { isDarkMode, toggleTheme } = useTheme();
   const { user, isLoggedIn } = useAuth();
   const [imgError, setImgError] = React.useState(false);
 
@@ -21,8 +21,8 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   }, [user?.avatar]);
 
   const isSmall = width < 360;
-  const logoWidth = isSmall ? 115 : width > 600 ? 165 : 138;
-  const logoHeight = isSmall ? 36 : width > 600 ? 48 : 40;
+  const logoWidth = isSmall ? 108 : width > 600 ? 150 : 124;
+  const logoHeight = isSmall ? 30 : width > 600 ? 40 : 34;
 
   const handleAccountPress = () => {
     if (onProfilePress) {
@@ -44,18 +44,6 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
     }
   };
 
-  const gradientColors = isDarkMode
-    ? ['rgba(8, 14, 28, 0.72)', 'rgba(8, 14, 28, 0.94)']
-    : ['rgba(255, 255, 255, 0.78)', 'rgba(255, 255, 255, 0.92)'];
-
-  const iconBtnBg = isDarkMode
-    ? 'rgba(255, 255, 255, 0.12)'
-    : 'rgba(255, 255, 255, 0.88)';
-
-  const iconBtnBorder = isDarkMode
-    ? 'rgba(255, 255, 255, 0.15)'
-    : 'rgba(0, 163, 232, 0.18)';
-
   return (
     <ImageBackground
       source={require('../../assets/header-bg.png')}
@@ -63,20 +51,23 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
       resizeMode="cover"
     >
       <LinearGradient
-        colors={gradientColors}
+        colors={
+          isDarkMode
+            ? ['rgba(10, 20, 45, 0.70)', 'rgba(5, 12, 28, 0.88)']
+            : ['rgba(0, 40, 90, 0.40)', 'rgba(0, 20, 50, 0.65)']
+        }
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0, y: 1 }}
         style={[
           styles.overlay,
           {
-            paddingTop: Math.max(insets.top, 12) + 4,
-            borderBottomColor: isDarkMode ? 'rgba(0, 163, 232, 0.2)' : 'rgba(0, 163, 232, 0.12)',
+            paddingTop: Math.max(insets.top, 10) + 4,
           },
         ]}
       >
         <View style={styles.topRow}>
-          {/* Official Brand Logo */}
-          <View style={styles.brandContainer}>
+          {/* Official Brand Logo on Crisp White Badge */}
+          <View style={styles.brandBadge}>
             <Image
               source={require('../../assets/logo.png')}
               style={{ width: logoWidth, height: logoHeight }}
@@ -93,7 +84,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
                 activeOpacity={0.85}
               >
                 <LinearGradient
-                  colors={['#00A3E8', '#0077B6']}
+                  colors={['#00C4FF', '#0077B6']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.vipBadgeButton}
@@ -108,7 +99,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
                 activeOpacity={0.85}
               >
                 <LinearGradient
-                  colors={['#00A3E8', '#0284C7']}
+                  colors={['#00C4FF', '#0284C7']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.subscribeIconButton}
@@ -122,29 +113,17 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
             {/* Search Button */}
             {onSearchPress && (
               <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  {
-                    backgroundColor: iconBtnBg,
-                    borderColor: iconBtnBorder,
-                  },
-                ]}
+                style={styles.glassButton}
                 onPress={onSearchPress}
                 activeOpacity={0.7}
               >
-                <Ionicons name="search-outline" size={18} color={isDarkMode ? '#F1F5F9' : '#0F172A'} />
+                <Ionicons name="search" size={18} color="#FFFFFF" />
               </TouchableOpacity>
             )}
 
             {/* Account / Profile Button */}
             <TouchableOpacity
-              style={[
-                styles.iconButton,
-                {
-                  backgroundColor: iconBtnBg,
-                  borderColor: iconBtnBorder,
-                },
-              ]}
+              style={styles.glassButton}
               onPress={handleAccountPress}
               activeOpacity={0.7}
             >
@@ -160,29 +139,23 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
                 />
               ) : (
                 <Ionicons
-                  name="person-outline"
+                  name="person"
                   size={18}
-                  color={isDarkMode ? '#F1F5F9' : '#0F172A'}
+                  color="#FFFFFF"
                 />
               )}
             </TouchableOpacity>
 
             {/* Dark / Light Toggle */}
             <TouchableOpacity
-              style={[
-                styles.iconButton,
-                {
-                  backgroundColor: iconBtnBg,
-                  borderColor: iconBtnBorder,
-                },
-              ]}
+              style={styles.glassButton}
               onPress={toggleTheme}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={isDarkMode ? 'sunny' : 'moon'}
                 size={18}
-                color={isDarkMode ? COLORS.gold : '#1E293B'}
+                color={isDarkMode ? '#FDE047' : '#FFFFFF'}
               />
             </TouchableOpacity>
           </View>
@@ -199,8 +172,9 @@ const styles = StyleSheet.create({
   },
   overlay: {
     paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.sm + 2,
+    paddingBottom: SPACING.sm + 4,
     borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 163, 232, 0.3)',
   },
   topRow: {
     flexDirection: 'row',
@@ -208,9 +182,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 46,
   },
-  brandContainer: {
-    flexDirection: 'row',
+  brandBadge: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   actions: {
     flexDirection: 'row',
@@ -220,15 +203,15 @@ const styles = StyleSheet.create({
   subscribeIconButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 6.5,
     borderRadius: RADIUS.full,
     gap: 4,
-    shadowColor: '#00A3E8',
+    shadowColor: '#00C4FF',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.45,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
   subscribeIconText: {
     color: '#FFFFFF',
@@ -239,15 +222,15 @@ const styles = StyleSheet.create({
   vipBadgeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 6.5,
     borderRadius: RADIUS.full,
     gap: 4,
-    shadowColor: '#00A3E8',
+    shadowColor: '#00C4FF',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.5,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
   vipBadgeText: {
     color: '#FFFFFF',
@@ -255,16 +238,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.5,
   },
-  iconButton: {
+  glassButton: {
     width: 36,
     height: 36,
     borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 2,
     elevation: 2,
   },
