@@ -580,16 +580,24 @@ export const AuthProvider = ({ children }) => {
       return uniqueOrders.map((o) => {
         const lineItems = (o.line_items || []).map((li) => li.name).join(', ') || 'VIP Subscription';
         const rawDate = o.date_created || o.date_created_gmt || o.date || new Date().toISOString();
-        const dateStr = parseSafeDate(rawDate).toLocaleDateString('en-US', {
+        const parsedD = parseSafeDate(rawDate);
+        const dateStr = parsedD.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric',
+        });
+        const timeStr = parsedD.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
         });
 
         return {
           id: `#${o.number || o.id}`,
           rawId: `${o.id}`,
           date: dateStr,
+          time: timeStr,
+          dateTime: `${dateStr}, ${timeStr}`,
           rawDate: rawDate,
           status: o.status ? (o.status.charAt(0).toUpperCase() + o.status.slice(1)) : 'Completed',
           total: `${o.currency_symbol || '₹'}${o.total || '0'} for ${(o.line_items || []).length || 1} item(s)`,
@@ -3749,7 +3757,14 @@ export const AuthProvider = ({ children }) => {
                 const viewUrl = orderNumMatch[1]?.startsWith('http')
                   ? orderNumMatch[1]
                   : `${WP_SITE_URL}/my-account/view-order/${orderId}/`;
+                const rawDateStr = dateMatch ? (dateMatch[1] || dateMatch[2] || '').trim() : '';
+                const parsedDateObj = parseSafeDate(rawDateStr);
                 const orderDate = dateMatch ? (dateMatch[2] || dateMatch[1]).trim() : 'Recent';
+                const timeStr = parsedDateObj.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                });
                 const rawStatus = statusMatch ? statusMatch[1].replace(/<[^>]+>/g, '').trim() : 'Completed';
                 const rawTotal = totalMatch ? totalMatch[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : '';
 
@@ -3757,6 +3772,9 @@ export const AuthProvider = ({ children }) => {
                   id: `#${orderId}`,
                   rawId: orderId,
                   date: orderDate,
+                  time: timeStr,
+                  dateTime: rawDateStr && rawDateStr.includes('T') ? `${orderDate}, ${timeStr}` : orderDate,
+                  rawDate: rawDateStr,
                   status: rawStatus,
                   total: rawTotal || '₹299 for 1 item',
                   viewUrl: viewUrl,

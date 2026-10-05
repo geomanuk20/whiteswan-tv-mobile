@@ -76,6 +76,34 @@ const ABOUT_PAGES = [
   },
 ];
 
+/**
+ * Helper: Format order date and time with fallback
+ */
+const formatOrderDateTime = (ord) => {
+  if (!ord) return '';
+  if (ord.dateTime) return ord.dateTime;
+  if (ord.date && ord.time) return `${ord.date}, ${ord.time}`;
+  if (ord.rawDate) {
+    try {
+      const d = new Date(ord.rawDate);
+      if (!isNaN(d.getTime())) {
+        const dateStr = d.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+        const timeStr = d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
+        return `${dateStr}, ${timeStr}`;
+      }
+    } catch (e) {}
+  }
+  return ord.date || 'Recent';
+};
+
 export const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -1166,7 +1194,7 @@ export const ProfileScreen = ({ navigation }) => {
                             Order {ord.id}
                           </Text>
                           <Text style={[styles.orderDateText, { color: colors.textSecondary }]}>
-                            {ord.date} • {ord.item || 'VIP Subscription'}
+                            {formatOrderDateTime(ord)} • {ord.item || 'VIP Subscription'}
                           </Text>
                           <Text style={[styles.orderTotalText, { color: colors.text }]}>
                             {ord.total}
@@ -2458,8 +2486,8 @@ export const ProfileScreen = ({ navigation }) => {
               <View style={{ gap: 14 }}>
                 <View style={[styles.orderDetailCard, { backgroundColor: isDarkMode ? '#1E293B' : '#F8FAFC', borderColor: colors.border }]}>
                   <View style={styles.orderDetailRow}>
-                    <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Order Date</Text>
-                    <Text style={{ color: colors.text, fontSize: 13, fontWeight: '700' }}>{selectedOrder.date}</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Order Date & Time</Text>
+                    <Text style={{ color: colors.text, fontSize: 13, fontWeight: '700' }}>{formatOrderDateTime(selectedOrder)}</Text>
                   </View>
                   <View style={styles.orderDetailRow}>
                     <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Status</Text>
