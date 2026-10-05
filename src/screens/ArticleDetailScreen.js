@@ -23,7 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import { NewsCard } from '../components/NewsCard';
 import { CommentSection } from '../components/CommentSection';
 import { fetchPostById, fetchPostBySlug, fetchPosts, fetchAuthorPosts } from '../services/wpApi';
-import { shareArticleWithImage, shareToWhatsApp } from '../utils/shareHelper';
+import { shareArticleWithImage, shareToWhatsApp, shareToFacebook, shareToTwitter } from '../utils/shareHelper';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
 export const ArticleDetailScreen = ({ route, navigation }) => {
@@ -119,6 +119,14 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
 
   const handleWhatsAppShare = async () => {
     await shareToWhatsApp(post);
+  };
+
+  const handleFacebookShare = async () => {
+    await shareToFacebook(post);
+  };
+
+  const handleTwitterShare = async () => {
+    await shareToTwitter(post);
   };
 
   const getPreviewHtml = () => {
@@ -284,8 +292,26 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
               onPress={handleWhatsAppShare}
               activeOpacity={0.8}
             >
-              <Ionicons name="logo-whatsapp" size={16} color="#FFFFFF" />
-              <Text style={styles.whatsappBtnText}>WhatsApp</Text>
+              <Ionicons name="logo-whatsapp" size={14} color="#FFFFFF" />
+              <Text style={styles.shareBtnText}>WhatsApp</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.facebookBtn}
+              onPress={handleFacebookShare}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="logo-facebook" size={14} color="#FFFFFF" />
+              <Text style={styles.shareBtnText}>Facebook</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.twitterBtn}
+              onPress={handleTwitterShare}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="logo-twitter" size={14} color="#FFFFFF" />
+              <Text style={styles.shareBtnText}>Twitter</Text>
             </TouchableOpacity>
           </View>
 
@@ -646,28 +672,48 @@ const styles = StyleSheet.create({
   shareBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: RADIUS.md,
-    gap: 10,
+    gap: 8,
     marginBottom: 16,
   },
   shareBarLabel: {
     fontSize: 12,
     fontWeight: '600',
+    marginRight: 2,
   },
   whatsappBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#25D366',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: RADIUS.full,
-    gap: 6,
+    gap: 5,
   },
-  whatsappBtnText: {
+  facebookBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1877F2',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    gap: 5,
+  },
+  twitterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1DA1F2',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    gap: 5,
+  },
+  shareBtnText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   htmlWrapper: {

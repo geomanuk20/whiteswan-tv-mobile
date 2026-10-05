@@ -137,14 +137,59 @@ export const shareArticleWithImage = async (post) => {
     }
   }
 
-  // Standard fallback
+/**
+ * Share article to Facebook
+ */
+export const shareToFacebook = async (post) => {
+  if (!post) return;
+  const url = post.link || (post.id ? `https://whiteswantvnews.com/?p=${post.id}` : 'https://whiteswantvnews.com');
+  const fbAppUrl = `fb://facewebmodal/f?href=${encodeURIComponent(url)}`;
+  const fbWebUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+
   try {
-    await Share.share({
-      title,
-      message: shareMessage,
-      url,
-    });
-  } catch (e) {
-    console.error('Standard share error:', e);
-  }
+    const supported = await Linking.canOpenURL(fbAppUrl);
+    if (supported) {
+      await Linking.openURL(fbAppUrl);
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    const canOpenWeb = await Linking.canOpenURL(fbWebUrl);
+    if (canOpenWeb) {
+      await Linking.openURL(fbWebUrl);
+      return;
+    }
+  } catch (e) {}
+
+  await shareArticleWithImage(post);
+};
+
+/**
+ * Share article to Twitter / X
+ */
+export const shareToTwitter = async (post) => {
+  if (!post) return;
+  const url = post.link || (post.id ? `https://whiteswantvnews.com/?p=${post.id}` : 'https://whiteswantvnews.com');
+  const text = post.title ? post.title.trim() : 'Whiteswan TV News';
+  const twitterAppUrl = `twitter://post?message=${encodeURIComponent(`${text}\n${url}`)}`;
+  const twitterWebUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+
+  try {
+    const supported = await Linking.canOpenURL(twitterAppUrl);
+    if (supported) {
+      await Linking.openURL(twitterAppUrl);
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    const canOpenWeb = await Linking.canOpenURL(twitterWebUrl);
+    if (canOpenWeb) {
+      await Linking.openURL(twitterWebUrl);
+      return;
+    }
+  } catch (e) {}
+
+  await shareArticleWithImage(post);
 };
