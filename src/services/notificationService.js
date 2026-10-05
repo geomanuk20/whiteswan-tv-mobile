@@ -161,13 +161,18 @@ class NotificationService {
 
     try {
       this.clickListener = (event) => {
-        console.log('[OneSignal] Notification clicked:', event);
+        try {
+          if (typeof event?.preventDefault === 'function') {
+            event.preventDefault();
+          }
+        } catch (_) {}
+        console.log('[OneSignal] Notification clicked:', JSON.stringify(event));
         this.handleNotificationClick(event);
       };
       OneSignal.Notifications?.addEventListener('click', this.clickListener);
 
       this.foregroundListener = (event) => {
-        console.log('[OneSignal] Foreground Notification:', event);
+        console.log('[OneSignal] Foreground Notification:', JSON.stringify(event));
       };
       OneSignal.Notifications?.addEventListener(
         'foregroundWillDisplay',
@@ -188,51 +193,71 @@ class NotificationService {
       // Check query parameter ?p=123 or &p=123
       const pMatch = trimmed.match(/[?&]p=(\d+)/i);
       if (pMatch && pMatch[1]) {
-        return { postId: parseInt(pMatch[1], 10) };
+        return { postId: parseInt(pMatch[1], 10), screen: 'ArticleDetail' };
       }
 
-      // Check if URL belongs to whiteswantvnews.com or is a relative path
-      if (trimmed.includes('whiteswantvnews.com') || trimmed.startsWith('/')) {
-        const cleanPath = trimmed
-          .replace(/^https?:\/\/(www\.)?whiteswantvnews\.com/i, '')
-          .split('?')[0]
-          .split('#')[0]
-          .replace(/^\/+|\/+$/g, '');
+      // Check whiteswantv:// custom scheme
+      if (trimmed.startsWith('whiteswantv://')) {
+        const pathPart = trimmed.replace('whiteswantv://', '');
+        if (pathPart.startsWith('article/')) {
+          const articleId = pathPart.replace('article/', '').split('?')[0];
+          if (/^\d+$/.test(articleId)) {
+            return { postId: parseInt(articleId, 10), screen: 'ArticleDetail' };
+          }
+          return { screen: 'ArticleDetail', params: { slug: decodeURIComponent(articleId), postUrl: trimmed } };
+        }
+      }
 
-        if (!cleanPath) {
-          return { screen: 'MainTabs' };
+      // Strip protocol and domain
+      let cleanPath = trimmed
+        .replace(/^https?:\/\/[^/]+/i, '')
+        .split('?')[0]
+        .split('#')[0]
+        .replace(/^\/+|\/+$/g, '');
+
+      if (!cleanPath) {
+        return { screen: 'MainTabs' };
+      }
+
+      const segments = cleanPath.split('/').filter(Boolean);
+      if (segments.length > 0) {
+        const lastSegment = segments[segments.length - 1];
+
+        if (cleanPath === 'live-tv' || cleanPath === 'live' || lastSegment === 'live-tv') {
+          return { screen: 'MainTabs', params: { screen: 'LiveTV' } };
         }
 
-        const segments = cleanPath.split('/').filter(Boolean);
-        if (segments.length > 0) {
-          const lastSegment = segments[segments.length - 1];
+        if (cleanPath.startsWith('category/') || cleanPath.startsWith('categories/')) {
+          const catSlug = segments[1] || '';
+          return { screen: 'MainTabs', params: { screen: 'Categories', categorySlug: catSlug } };
+        }
 
-          if (cleanPath === 'live-tv' || cleanPath === 'live' || lastSegment === 'live-tv') {
-            return { screen: 'MainTabs', params: { screen: 'LiveTV' } };
-          }
+        if (cleanPath === 'saved' || cleanPath === 'bookmarks') {
+          return { screen: 'MainTabs', params: { screen: 'Saved' } };
+        }
 
-          if (cleanPath.startsWith('category/') || cleanPath.startsWith('categories/')) {
-            return { screen: 'MainTabs', params: { screen: 'Categories' } };
-          }
+        if (cleanPath === 'premium' || cleanPath === 'pricing' || cleanPath === 'subscribe') {
+          return { screen: 'PremiumPlans' };
+        }
 
-          if (cleanPath === 'saved' || cleanPath === 'bookmarks') {
-            return { screen: 'MainTabs', params: { screen: 'Saved' } };
-          }
+        // Article slug
+        if (
+          lastSegment !== 'wp-admin' &&
+          lastSegment !== 'wp-login.php' &&
+          lastSegment !== 'feed'
+        ) {
+          let decodedSlug = lastSegment;
+          try {
+            decodedSlug = decodeURIComponent(lastSegment);
+          } catch (_) {}
 
-          // Article slug
-          if (
-            lastSegment !== 'wp-admin' &&
-            lastSegment !== 'wp-login.php' &&
-            lastSegment !== 'feed'
-          ) {
-            return {
-              screen: 'ArticleDetail',
-              params: {
-                slug: decodeURIComponent(lastSegment),
-                postUrl: trimmed,
-              },
-            };
-          }
+          return {
+            screen: 'ArticleDetail',
+            params: {
+              slug: decodedSlug,
+              postUrl: trimmed,
+            },
+          };
         }
       }
     } catch (e) {
@@ -295,6 +320,8 @@ class NotificationService {
       data.target_url ||
       data.openURL ||
       data.link ||
+      data.web_url ||
+      event?.result?.url ||
       event?.notification?.launchURL;
 
     if (url) {
@@ -305,7 +332,7 @@ class NotificationService {
           return;
         }
         if (parsed.screen === 'ArticleDetail') {
-          this.navigateSafely('ArticleDetail', parsed.params);
+          this.navigateSafely('ArticleDetail', parsed.params || { postUrl: url });
           return;
         }
         if (parsed.screen) {
@@ -314,12 +341,16 @@ class NotificationService {
         }
       }
 
-      // If it is an external link (not whiteswantvnews.com), open in external browser
-      Linking.canOpenURL(url).then((supported) => {
-        if (supported) {
-          Linking.openURL(url);
-        }
-      });
+      // If it is a completely external non-news link (e.g. advertiser website), open in external browser
+      if (!url.includes('whiteswantvnews.com') && (url.startsWith('http://') || url.startsWith('https://'))) {
+        Linking.canOpenURL(url).then((supported) => {
+          if (supported) {
+            Linking.openURL(url);
+          }
+        });
+      } else {
+        this.navigateSafely('ArticleDetail', { postUrl: url });
+      }
       return;
     }
 

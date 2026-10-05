@@ -443,20 +443,53 @@ export const fetchPostById = async (id, { bypassCache = true } = {}) => {
 export const fetchPostBySlug = async (slug, { bypassCache = true } = {}) => {
   if (!slug) return null;
   try {
-    const cleanSlug = encodeURIComponent(String(slug).replace(/^\/+|\/+$/g, ''));
+    const raw = String(slug).replace(/^\/+|\/+$/g, '');
+    let decoded = raw;
+    try {
+      decoded = decodeURIComponent(raw);
+    } catch (_) {}
+
+    const cleanSlug = encodeURIComponent(decoded);
     const ts = bypassCache ? `&_t=${Date.now()}` : '';
-    const response = await fetch(`${WP_BASE_URL}/posts?slug=${cleanSlug}&_embed=1${ts}`, {
+
+    // 1. Try with properly encoded slug
+    let response = await fetch(`${WP_BASE_URL}/posts?slug=${cleanSlug}&_embed=1${ts}`, {
       headers: HEADERS,
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to load post by slug ${slug}: ${response.status}`);
+    if (response.ok) {
+      const rawPosts = await response.json();
+      if (Array.isArray(rawPosts) && rawPosts.length > 0) {
+        return formatPost(rawPosts[0]);
+      }
     }
 
-    const rawPosts = await response.json();
-    if (Array.isArray(rawPosts) && rawPosts.length > 0) {
-      return formatPost(rawPosts[0]);
+    // 2. If raw differs from cleanSlug, try raw
+    if (raw !== cleanSlug) {
+      response = await fetch(`${WP_BASE_URL}/posts?slug=${raw}&_embed=1${ts}`, {
+        headers: HEADERS,
+      });
+      if (response.ok) {
+        const rawPosts = await response.json();
+        if (Array.isArray(rawPosts) && rawPosts.length > 0) {
+          return formatPost(rawPosts[0]);
+        }
+      }
     }
+
+    // 3. Fallback: search by decoded text/title
+    if (decoded && decoded.length > 3) {
+      response = await fetch(`${WP_BASE_URL}/posts?search=${encodeURIComponent(decoded)}&per_page=3&_embed=1${ts}`, {
+        headers: HEADERS,
+      });
+      if (response.ok) {
+        const rawPosts = await response.json();
+        if (Array.isArray(rawPosts) && rawPosts.length > 0) {
+          return formatPost(rawPosts[0]);
+        }
+      }
+    }
+
     return null;
   } catch (error) {
     console.error(`Error fetching post by slug ${slug}:`, error);

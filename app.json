@@ -33,6 +33,7 @@
       "icon": "./assets/notification_icon.png",
       "color": "#00A3E8"
     },
+    "scheme": "whiteswantv",
     "android": {
       "package": "com.whiteswantv.news",
       "versionCode": 23,
@@ -49,6 +50,44 @@
         "RECEIVE_BOOT_COMPLETED"
       ],
       "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "whiteswantvnews.com"
+            },
+            {
+              "scheme": "https",
+              "host": "www.whiteswantvnews.com"
+            },
+            {
+              "scheme": "http",
+              "host": "whiteswantvnews.com"
+            },
+            {
+              "scheme": "http",
+              "host": "www.whiteswantvnews.com"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "whiteswantv"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
         {
           "action": "VIEW",
           "data": [

@@ -72,11 +72,11 @@ const BottomTabNavigator = () => {
         name="LiveTV"
         component={LiveTVScreen}
         options={{
-          tabBarLabel: 'Dashboard',
+          tabBarLabel: 'Channels',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'apps' : 'apps-outline'}
-              size={22}
+              name={focused ? 'play-circle' : 'play-circle-outline'}
+              size={23}
               color={color}
             />
           ),
@@ -149,6 +149,33 @@ export const AppNavigator = () => {
     };
   }, []);
 
+  const linking = {
+    prefixes: [
+      'whiteswantv://',
+      'https://whiteswantvnews.com',
+      'https://www.whiteswantvnews.com',
+      'http://whiteswantvnews.com',
+      'http://www.whiteswantvnews.com',
+    ],
+    config: {
+      screens: {
+        ArticleDetail: {
+          path: ':slug',
+        },
+        MainTabs: {
+          screens: {
+            Home: '',
+            LiveTV: 'live-tv',
+            Categories: 'categories',
+            Saved: 'saved',
+            Account: 'my-account',
+          },
+        },
+        PremiumPlans: 'premium',
+      },
+    },
+  };
+
   const navigationTheme = {
     ...baseTheme,
     dark: isDarkMode,
@@ -164,7 +191,14 @@ export const AppNavigator = () => {
   };
 
   return (
-    <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+    <NavigationContainer
+      ref={navigationRef}
+      linking={linking}
+      onReady={() => {
+        NotificationService.setNavigationRef(navigationRef);
+      }}
+      theme={navigationTheme}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
         <Stack.Screen
