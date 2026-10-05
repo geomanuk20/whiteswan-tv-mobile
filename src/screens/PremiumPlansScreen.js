@@ -513,7 +513,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
                 <Ionicons name="diamond" size={24} color="#FFFFFF" />
               </View>
               <Text style={[styles.vipCardTitle, { color: colors.text }]}>
-                You Are a VIP Member!
+                You Are a Premium Member!
               </Text>
               <Text style={[styles.vipCardSubtitle, { color: colors.textSecondary }]}>
                 Your subscription is active with full access across Whiteswan TV News.
@@ -746,7 +746,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
             <Ionicons name="shield-checkmark" size={14} color="#10B981" />
             <Text style={[styles.secureText, { color: colors.textSecondary }]}>
               {isAlreadyPremium
-                ? 'Active VIP Member • 1 Plan Allowed at a Time'
+                ? 'Active Premium Member • 1 Plan Allowed at a Time'
                 : 'Secure PhonePe & UPI Payment • 100% Safe'}
             </Text>
           </View>

@@ -795,7 +795,7 @@ export const ProfileScreen = ({ navigation }) => {
                       { color: user.isPremium ? COLORS.primary : colors.textSecondary },
                     ]}
                   >
-                    {user.isPremium ? 'VIP Member' : 'Member'}
+                    {user.isPremium ? 'Premium Member' : 'Member'}
                   </Text>
                 </View>
               </View>
@@ -914,7 +914,7 @@ export const ProfileScreen = ({ navigation }) => {
                 </View>
                 <Text style={[styles.tileTitle, { color: colors.text }]}>Orders & Subscriptions</Text>
                 <Text style={[styles.tileSubtitle, { color: colors.textSecondary }]}>
-                  {user.isPremium ? (subDetails?.planName || 'Active VIP Member') : (orders.length > 0 ? `${orders.length} orders recorded` : 'View order history')}
+                  {user.isPremium ? (subDetails?.planName || 'Active Premium Member') : (orders.length > 0 ? `${orders.length} orders recorded` : 'View order history')}
                 </Text>
                 <View style={styles.tileFooterRow}>
                   <Text style={styles.tileActionLink}>View Orders & VIP →</Text>
@@ -1142,7 +1142,7 @@ export const ProfileScreen = ({ navigation }) => {
                         { color: isDarkMode ? '#7DD3FC' : '#0284C7' },
                       ]}
                     >
-                      {subDetails.isExpired ? 'Renew Subscription Now' : 'View VIP Membership'}
+                      {subDetails.isExpired ? 'Renew Subscription Now' : 'View Premium Membership'}
                     </Text>
                     <Ionicons name="arrow-forward" size={14} color={isDarkMode ? '#7DD3FC' : '#0284C7'} />
                   </TouchableOpacity>
@@ -1586,7 +1586,7 @@ export const ProfileScreen = ({ navigation }) => {
                     Membership Status
                   </Text>
                   <Text style={[styles.addressItemValue, { color: colors.text }]}>
-                    {user?.isPremium ? 'Premium VIP Member' : (user?.role || 'Free Member')}
+                    {user?.isPremium ? 'Premium Member' : (user?.role || 'Free Member')}
                   </Text>
                 </View>
               </View>

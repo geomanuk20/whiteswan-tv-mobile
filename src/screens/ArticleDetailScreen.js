@@ -365,7 +365,7 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
                       style={styles.paywallRestoreBtn}
                     >
                       <Text style={[styles.paywallRestoreBtnText, { color: COLORS.primary }]}>
-                        Already a VIP Member? Sign In →
+                        Already a Premium Member? Sign In →
                       </Text>
                     </TouchableOpacity>
                   </View>
