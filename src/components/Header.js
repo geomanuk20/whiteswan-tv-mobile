@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -65,7 +65,6 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
           },
         ]}
       >
-        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
         <View style={styles.topRow}>
           {/* Official Brand Logo */}
           <View style={styles.brandContainer}>
