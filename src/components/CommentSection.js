@@ -119,7 +119,7 @@ export const CommentSection = ({ postId, postTitle }) => {
         authorEmail,
         content: trimmedContent,
         parentId: replyingTo?.id || 0,
-        token,
+        cookies: user?.wpCookies,
       });
 
       // Optimistically add comment to list

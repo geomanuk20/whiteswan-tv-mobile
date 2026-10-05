@@ -664,7 +664,7 @@ export const fetchComments = async (postId, { page = 1, perPage = 50, bypassCach
 };
 
 /**
- * Submit a comment on a WordPress post
+ * Submit a comment on a WordPress post (Using WordPress core comment processor)
  */
 export const createComment = async ({
   postId,
@@ -672,50 +672,108 @@ export const createComment = async ({
   authorEmail,
   content,
   parentId = 0,
+  cookies = null,
   token = null,
 }) => {
   if (!postId || !content || !content.trim()) {
     throw new Error('Comment content and Post ID are required.');
   }
 
+  const cleanName = (authorName || 'Reader').trim();
+  const cleanEmail = (authorEmail || '').trim();
+  const cleanContent = content.trim();
+
   try {
+    // Strategy 1: Post via WordPress core wp-comments-post.php (matches website submission)
+    const bodyParams = new URLSearchParams();
+    bodyParams.append('comment_post_ID', String(postId));
+    bodyParams.append('comment', cleanContent);
+    bodyParams.append('author', cleanName);
+    if (cleanEmail) {
+      bodyParams.append('email', cleanEmail);
+    }
+    bodyParams.append('comment_parent', String(parentId || 0));
+    bodyParams.append('submit', 'Post Comment');
+
     const headers = {
-      ...HEADERS,
-      'Content-Type': 'application/json',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'User-Agent': HEADERS['User-Agent'],
+      'Referer': `https://whiteswantvnews.com/?p=${postId}`,
+      'Origin': 'https://whiteswantvnews.com',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      ...(cookies ? { 'Cookie': cookies } : {}),
     };
 
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const bodyData = {
-      post: parseInt(postId, 10),
-      content: content.trim(),
-      author_name: authorName ? authorName.trim() : 'Reader',
-      author_email: authorEmail ? authorEmail.trim() : '',
-    };
-
-    if (parentId && parseInt(parentId, 10) > 0) {
-      bodyData.parent = parseInt(parentId, 10);
-    }
-
-    const response = await fetch(`${WP_BASE_URL}/comments`, {
+    const response = await fetch('https://whiteswantvnews.com/wp-comments-post.php', {
       method: 'POST',
       headers,
-      body: JSON.stringify(bodyData),
+      body: bodyParams.toString(),
+      redirect: 'manual',
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      let msg = data?.message || 'Failed to submit comment.';
-      msg = msg.replace(/<[^>]+>/g, '').trim();
-      throw new Error(msg);
+    const locationHeader = response.headers.get('location') || '';
+    let commentId = null;
+    if (locationHeader && locationHeader.includes('#comment-')) {
+      const match = locationHeader.match(/#comment-(\d+)/);
+      if (match) {
+        commentId = parseInt(match[1], 10);
+      }
     }
 
-    return formatComment(data);
+    // Check for WordPress error page responses
+    if (response.status >= 400) {
+      const text = await response.text().catch(() => '');
+      const errMatch =
+        text.match(/<p class=["']wp-die-message["']>([\s\S]*?)<\/p>/i) ||
+        text.match(/<p>([\s\S]*?)<\/p>/i);
+      if (errMatch) {
+        const cleanMsg = decodeHtmlEntities(errMatch[1]);
+        if (cleanMsg) throw new Error(cleanMsg);
+      }
+      throw new Error(`WordPress server returned error (${response.status})`);
+    }
+
+    return {
+      id: commentId || Date.now(),
+      postId: parseInt(postId, 10),
+      parent: parseInt(parentId || 0, 10),
+      authorName: cleanName,
+      authorAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=00A3E8&color=fff&bold=true`,
+      date: new Date().toISOString(),
+      timeAgo: 'Just now',
+      content: cleanContent,
+      status: 'approved',
+    };
   } catch (error) {
-    console.error('Error creating comment:', error);
+    console.warn('wp-comments-post error, trying REST API fallback:', error?.message);
+
+    // Strategy 2: Fallback to REST API /wp-json/wp/v2/comments if available
+    try {
+      const restHeaders = {
+        ...HEADERS,
+        'Content-Type': 'application/json',
+      };
+      if (token) restHeaders['Authorization'] = `Bearer ${token}`;
+      if (cookies) restHeaders['Cookie'] = cookies;
+
+      const restRes = await fetch(`${WP_BASE_URL}/comments`, {
+        method: 'POST',
+        headers: restHeaders,
+        body: JSON.stringify({
+          post: parseInt(postId, 10),
+          content: cleanContent,
+          author_name: cleanName,
+          author_email: cleanEmail,
+          parent: parseInt(parentId || 0, 10),
+        }),
+      });
+
+      const data = await restRes.json();
+      if (restRes.ok) {
+        return formatComment(data);
+      }
+    } catch (_) {}
+
     throw error;
   }
 };
