@@ -9,18 +9,16 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
-  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { fetchComments, createComment } from '../services/wpApi';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
-const GUEST_STORAGE_KEY = '@wp_guest_commenter_info';
-
 export const CommentSection = ({ postId, postTitle }) => {
+  const navigation = useNavigation();
   const { colors, isDarkMode } = useTheme();
   const { user, isLoggedIn, token } = useAuth();
 
@@ -28,33 +26,11 @@ export const CommentSection = ({ postId, postTitle }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null); // { id, authorName }
-
-  // Form fields
   const [content, setContent] = useState('');
-  const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
-  const [saveInfo, setSaveInfo] = useState(true);
   const [likedComments, setLikedComments] = useState({});
   const [commentLikesCount, setCommentLikesCount] = useState({});
 
   const inputRef = useRef(null);
-
-  // Load saved guest details
-  useEffect(() => {
-    const loadGuestInfo = async () => {
-      if (!isLoggedIn) {
-        try {
-          const saved = await AsyncStorage.getItem(GUEST_STORAGE_KEY);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.name) setGuestName(parsed.name);
-            if (parsed.email) setGuestEmail(parsed.email);
-          }
-        } catch (_) {}
-      }
-    };
-    loadGuestInfo();
-  }, [isLoggedIn]);
 
   // Fetch comments when postId changes
   useEffect(() => {
@@ -76,10 +52,24 @@ export const CommentSection = ({ postId, postTitle }) => {
   };
 
   const handleReplyPress = (comment) => {
-    setReplyingTo(comment);
-    if (inputRef.current) {
-      inputRef.current.focus();
+    if (!isLoggedIn) {
+      Alert.alert(
+        'Login Required',
+        'Please log in to your account to reply to comments.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Log In', onPress: () => navigation.navigate('Login') },
+        ]
+      );
+      return;
     }
+
+    setReplyingTo(comment);
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 150);
   };
 
   const cancelReply = () => {
@@ -98,39 +88,26 @@ export const CommentSection = ({ postId, postTitle }) => {
   };
 
   const handleSubmit = async () => {
+    if (!isLoggedIn) {
+      Alert.alert(
+        'Login Required',
+        'Please log in to your account to post a comment.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Log In', onPress: () => navigation.navigate('Login') },
+        ]
+      );
+      return;
+    }
+
     const trimmedContent = content.trim();
     if (!trimmedContent) {
       Alert.alert('Validation Error', 'Please type your comment before posting.');
       return;
     }
 
-    let authorName = user?.name || guestName.trim();
-    let authorEmail = user?.email || guestEmail.trim();
-
-    if (!isLoggedIn) {
-      if (!authorName) {
-        Alert.alert('Name Required', 'Please enter your name to post a comment.');
-        return;
-      }
-      if (!authorEmail) {
-        Alert.alert('Email Required', 'Please enter your email address to post a comment.');
-        return;
-      }
-
-      // Simple email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(authorEmail)) {
-        Alert.alert('Invalid Email', 'Please provide a valid email address.');
-        return;
-      }
-
-      if (saveInfo) {
-        AsyncStorage.setItem(
-          GUEST_STORAGE_KEY,
-          JSON.stringify({ name: authorName, email: authorEmail })
-        ).catch(() => {});
-      }
-    }
+    const authorName = user?.name || user?.username || 'Member';
+    const authorEmail = user?.email || '';
 
     try {
       setSubmitting(true);
@@ -155,7 +132,7 @@ export const CommentSection = ({ postId, postTitle }) => {
 
       Alert.alert(
         'Comment Submitted',
-        'Thank you! Your comment has been posted and will appear on the article.'
+        'Thank you! Your comment has been posted.'
       );
     } catch (error) {
       Alert.alert('Submission Error', error?.message || 'Failed to submit comment. Please try again.');
@@ -264,6 +241,10 @@ export const CommentSection = ({ postId, postTitle }) => {
     );
   };
 
+  const userAvatar =
+    user?.avatar ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'User')}&background=00A3E8&color=fff&bold=true`;
+
   return (
     <View style={[styles.container, { borderTopColor: colors.border }]}>
       {/* Section Header */}
@@ -304,125 +285,107 @@ export const CommentSection = ({ postId, postTitle }) => {
         </View>
       )}
 
-      {/* Comment Input Box */}
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-          },
-        ]}
-      >
-        {/* User preview */}
-        {isLoggedIn ? (
-          <View style={styles.loggedInUserRow}>
-            <Image
-              source={{
-                uri:
-                  user?.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=00A3E8&color=fff&bold=true`,
-              }}
-              style={styles.inputUserAvatar}
-            />
-            <Text style={[styles.loggedInAsText, { color: colors.textSecondary }]}>
-              Posting as <Text style={{ color: colors.text, fontWeight: '700' }}>{user?.name}</Text>
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.guestFieldsContainer}>
-            <View style={styles.guestInputRow}>
-              <View style={[styles.guestInputWrapper, { backgroundColor: colors.inputBg }]}>
-                <Ionicons name="person-outline" size={16} color={colors.textSecondary} />
-                <TextInput
-                  placeholder="Your Name *"
-                  placeholderTextColor={colors.textSecondary}
-                  value={guestName}
-                  onChangeText={setGuestName}
-                  style={[styles.guestTextInput, { color: colors.text }]}
-                />
-              </View>
-              <View style={[styles.guestInputWrapper, { backgroundColor: colors.inputBg }]}>
-                <Ionicons name="mail-outline" size={16} color={colors.textSecondary} />
-                <TextInput
-                  placeholder="Your Email *"
-                  placeholderTextColor={colors.textSecondary}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={guestEmail}
-                  onChangeText={setGuestEmail}
-                  style={[styles.guestTextInput, { color: colors.text }]}
-                />
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Text Input */}
-        <TextInput
-          ref={inputRef}
-          multiline
-          numberOfLines={3}
-          placeholder={
-            replyingTo
-              ? `Write a reply to ${replyingTo.authorName}...`
-              : 'Write your thoughts or opinion here...'
-          }
-          placeholderTextColor={colors.textSecondary}
-          value={content}
-          onChangeText={setContent}
+      {/* Comment Input Box (Logged In Only) or Login Prompt Card */}
+      {isLoggedIn ? (
+        <View
           style={[
-            styles.mainTextInput,
+            styles.inputContainer,
             {
-              backgroundColor: colors.inputBg,
-              color: colors.text,
+              backgroundColor: colors.card,
               borderColor: colors.border,
             },
           ]}
-        />
-
-        {/* Submit Bar */}
-        <View style={styles.submitBar}>
-          {!isLoggedIn && (
-            <TouchableOpacity
-              style={styles.saveInfoRow}
-              onPress={() => setSaveInfo(!saveInfo)}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name={saveInfo ? 'checkbox' : 'square-outline'}
-                size={16}
-                color={saveInfo ? COLORS.primary : colors.textSecondary}
-              />
-              <Text style={[styles.saveInfoText, { color: colors.textSecondary }]}>
-                Remember details
+        >
+          <View style={styles.loggedInUserRow}>
+            <Image source={{ uri: userAvatar }} style={styles.inputUserAvatar} />
+            <Text style={[styles.loggedInAsText, { color: colors.textSecondary }]}>
+              Posting as{' '}
+              <Text style={{ color: colors.text, fontWeight: '700' }}>
+                {user?.name || user?.username || 'Member'}
               </Text>
-            </TouchableOpacity>
-          )}
+            </Text>
+          </View>
 
-          <TouchableOpacity
+          {/* Text Input */}
+          <TextInput
+            ref={inputRef}
+            multiline
+            numberOfLines={3}
+            placeholder={
+              replyingTo
+                ? `Write a reply to ${replyingTo.authorName}...`
+                : 'Write your thoughts or opinion here...'
+            }
+            placeholderTextColor={colors.textSecondary}
+            value={content}
+            onChangeText={setContent}
             style={[
-              styles.submitBtn,
+              styles.mainTextInput,
               {
-                backgroundColor: content.trim().length > 0 ? COLORS.primary : colors.border,
-                opacity: submitting ? 0.7 : 1,
+                backgroundColor: colors.inputBg,
+                color: colors.text,
+                borderColor: colors.border,
               },
             ]}
-            onPress={handleSubmit}
-            disabled={submitting || content.trim().length === 0}
+          />
+
+          {/* Submit Bar */}
+          <View style={styles.submitBar}>
+            <TouchableOpacity
+              style={[
+                styles.submitBtn,
+                {
+                  backgroundColor: content.trim().length > 0 ? COLORS.primary : colors.border,
+                  opacity: submitting ? 0.7 : 1,
+                },
+              ]}
+              onPress={handleSubmit}
+              disabled={submitting || content.trim().length === 0}
+              activeOpacity={0.85}
+            >
+              {submitting ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Text style={styles.submitBtnText}>Post Comment</Text>
+                  <Ionicons name="send" size={14} color="#FFFFFF" />
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        /* Login Required Card */
+        <View
+          style={[
+            styles.loginPromptCard,
+            {
+              backgroundColor: isDarkMode ? '#131D31' : '#F0F9FF',
+              borderColor: isDarkMode ? '#1E293B' : '#BAE6FD',
+            },
+          ]}
+        >
+          <View style={styles.loginPromptIconWrapper}>
+            <Ionicons name="lock-closed" size={22} color={COLORS.primary} />
+          </View>
+          <View style={styles.loginPromptContent}>
+            <Text style={[styles.loginPromptTitle, { color: colors.text }]}>
+              Log in to Comment
+            </Text>
+            <Text style={[styles.loginPromptSubtitle, { color: colors.textSecondary }]}>
+              Join the conversation and share your opinion.
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.loginPromptBtn}
+            onPress={() => navigation.navigate('Login')}
             activeOpacity={0.85}
           >
-            {submitting ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <>
-                <Text style={styles.submitBtnText}>Post Comment</Text>
-                <Ionicons name="send" size={14} color="#FFFFFF" />
-              </>
-            )}
+            <Text style={styles.loginPromptBtnText}>Log In</Text>
+            <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
-      </View>
+      )}
 
       {/* Comments List */}
       {loading ? (
@@ -527,26 +490,6 @@ const styles = StyleSheet.create({
   loggedInAsText: {
     fontSize: 12,
   },
-  guestFieldsContainer: {
-    marginBottom: 10,
-  },
-  guestInputRow: {
-    flexDirection: 'column',
-    gap: 8,
-  },
-  guestInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    height: 38,
-    gap: 6,
-  },
-  guestTextInput: {
-    flex: 1,
-    fontSize: 13,
-    paddingVertical: 0,
-  },
   mainTextInput: {
     minHeight: 75,
     borderRadius: 10,
@@ -559,29 +502,62 @@ const styles = StyleSheet.create({
   submitBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     marginTop: 10,
-  },
-  saveInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  saveInfoText: {
-    fontSize: 12,
   },
   submitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: RADIUS.full,
     gap: 6,
-    marginLeft: 'auto',
   },
   submitBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
+    fontWeight: '700',
+  },
+  loginPromptCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: SPACING.lg,
+    gap: 12,
+  },
+  loginPromptIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 163, 232, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginPromptContent: {
+    flex: 1,
+  },
+  loginPromptTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  loginPromptSubtitle: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  loginPromptBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: RADIUS.full,
+    gap: 4,
+  },
+  loginPromptBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '700',
   },
   loadingContainer: {
