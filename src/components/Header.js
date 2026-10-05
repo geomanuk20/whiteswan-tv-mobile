@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -20,8 +20,8 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   }, [user?.avatar]);
 
   const isSmall = width < 360;
-  const logoWidth = isSmall ? 110 : width > 600 ? 160 : 130;
-  const logoHeight = isSmall ? 34 : width > 600 ? 46 : 38;
+  const logoWidth = isSmall ? 115 : width > 600 ? 165 : 135;
+  const logoHeight = isSmall ? 36 : width > 600 ? 48 : 40;
 
   const handleAccountPress = () => {
     if (onProfilePress) {
@@ -44,16 +44,29 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   };
 
   return (
-    <View
+    <ImageBackground
+      source={require('../../assets/header-bg.png')}
       style={[
         styles.container,
         {
-          backgroundColor: colors.card,
-          borderBottomColor: colors.border,
           paddingTop: Math.max(insets.top, 12) + 4,
+          borderBottomColor: isDarkMode ? 'rgba(0, 163, 232, 0.25)' : colors.border,
         },
       ]}
+      resizeMode="cover"
     >
+      {/* Subtle backdrop overlay for enhanced contrast */}
+      <View
+        style={[
+          styles.overlay,
+          {
+            backgroundColor: isDarkMode
+              ? 'rgba(7, 13, 24, 0.45)'
+              : 'rgba(248, 250, 252, 0.15)',
+          },
+        ]}
+      />
+
       <View style={styles.topRow}>
         {/* Official Brand Logo */}
         <View style={styles.brandContainer}>
@@ -90,17 +103,41 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
           {/* Search Button */}
           {onSearchPress && (
             <TouchableOpacity
-              style={[styles.iconButton, { backgroundColor: colors.inputBg }]}
+              style={[
+                styles.iconButton,
+                {
+                  backgroundColor: isDarkMode
+                    ? 'rgba(255, 255, 255, 0.14)'
+                    : 'rgba(255, 255, 255, 0.88)',
+                  borderColor: isDarkMode
+                    ? 'rgba(255, 255, 255, 0.18)'
+                    : 'rgba(0, 163, 232, 0.25)',
+                },
+              ]}
               onPress={onSearchPress}
               activeOpacity={0.7}
             >
-              <Ionicons name="search-outline" size={18} color={colors.text} />
+              <Ionicons
+                name="search-outline"
+                size={18}
+                color={isDarkMode ? '#FFFFFF' : COLORS.textPrimary}
+              />
             </TouchableOpacity>
           )}
 
           {/* Account / Profile Button */}
           <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.inputBg }]}
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: isDarkMode
+                  ? 'rgba(255, 255, 255, 0.14)'
+                  : 'rgba(255, 255, 255, 0.88)',
+                borderColor: isDarkMode
+                  ? 'rgba(255, 255, 255, 0.18)'
+                  : 'rgba(0, 163, 232, 0.25)',
+              },
+            ]}
             onPress={handleAccountPress}
             activeOpacity={0.7}
           >
@@ -118,40 +155,56 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
               <Ionicons
                 name="person-outline"
                 size={18}
-                color={colors.text}
+                color={isDarkMode ? '#FFFFFF' : COLORS.textPrimary}
               />
             )}
           </TouchableOpacity>
 
           {/* Dark / Light Toggle */}
           <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.inputBg }]}
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: isDarkMode
+                  ? 'rgba(255, 255, 255, 0.14)'
+                  : 'rgba(255, 255, 255, 0.88)',
+                borderColor: isDarkMode
+                  ? 'rgba(255, 255, 255, 0.18)'
+                  : 'rgba(0, 163, 232, 0.25)',
+              },
+            ]}
             onPress={toggleTheme}
             activeOpacity={0.7}
           >
             <Ionicons
               name={isDarkMode ? 'sunny-outline' : 'moon-outline'}
               size={18}
-              color={isDarkMode ? COLORS.gold : colors.text}
+              color={isDarkMode ? COLORS.gold : COLORS.textPrimary}
             />
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.sm,
+    paddingBottom: SPACING.sm + 2,
     borderBottomWidth: 1,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 46,
+    zIndex: 1,
   },
   brandContainer: {
     flexDirection: 'row',
@@ -165,15 +218,15 @@ const styles = StyleSheet.create({
   subscribeIconButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5.5,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
-    gap: 4,
+    gap: 4.5,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 4,
   },
   subscribeIconText: {
     color: '#FFFFFF',
@@ -184,15 +237,15 @@ const styles = StyleSheet.create({
   vipBadgeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5.5,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
-    gap: 4,
+    gap: 4.5,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 4,
   },
   vipBadgeText: {
     color: '#FFFFFF',
@@ -206,6 +259,12 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
   },
   headerAvatar: {
     width: 28,
