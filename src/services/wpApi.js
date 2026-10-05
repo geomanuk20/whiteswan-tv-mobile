@@ -595,6 +595,132 @@ export const fetchCategories = async () => {
 };
 
 /**
+ * Format comment object from WordPress REST API
+ */
+export const formatComment = (comment) => {
+  if (!comment) return null;
+  const rawContent = comment.content?.rendered || '';
+  const cleanContent = decodeHtmlEntities(
+    rawContent
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
+
+  let avatar =
+    comment.author_avatar_urls?.['96'] ||
+    comment.author_avatar_urls?.['48'] ||
+    comment.author_avatar_urls?.['24'] ||
+    '';
+
+  const authorName = decodeHtmlEntities(comment.author_name || 'Reader');
+  if (!avatar || avatar.includes('gravatar.com/avatar/?d=mm') || avatar.includes('d=blank')) {
+    avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=00A3E8&color=fff&bold=true`;
+  }
+
+  return {
+    id: comment.id,
+    postId: comment.post,
+    parent: comment.parent || 0,
+    authorName,
+    authorAvatar: avatar,
+    authorUrl: comment.author_url || '',
+    date: comment.date,
+    timeAgo: timeAgo(comment.date),
+    content: cleanContent,
+    rawContent,
+    status: comment.status || 'approved',
+  };
+};
+
+/**
+ * Fetch comments for a specific post
+ */
+export const fetchComments = async (postId, { page = 1, perPage = 50, bypassCache = true } = {}) => {
+  if (!postId) return [];
+  try {
+    const ts = bypassCache ? `&_t=${Date.now()}` : '';
+    const response = await fetch(
+      `${WP_BASE_URL}/comments?post=${postId}&page=${page}&per_page=${perPage}&order=asc${ts}`,
+      { headers: HEADERS }
+    );
+
+    if (!response.ok) {
+      if (response.status === 400 || response.status === 404) {
+        return [];
+      }
+      throw new Error(`Failed to load comments: ${response.status}`);
+    }
+
+    const rawComments = await response.json();
+    if (Array.isArray(rawComments)) {
+      return rawComments.map(formatComment).filter(Boolean);
+    }
+    return [];
+  } catch (error) {
+    console.warn(`Error fetching comments for post ${postId}:`, error?.message || error);
+    return [];
+  }
+};
+
+/**
+ * Submit a comment on a WordPress post
+ */
+export const createComment = async ({
+  postId,
+  authorName,
+  authorEmail,
+  content,
+  parentId = 0,
+  token = null,
+}) => {
+  if (!postId || !content || !content.trim()) {
+    throw new Error('Comment content and Post ID are required.');
+  }
+
+  try {
+    const headers = {
+      ...HEADERS,
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const bodyData = {
+      post: parseInt(postId, 10),
+      content: content.trim(),
+      author_name: authorName ? authorName.trim() : 'Reader',
+      author_email: authorEmail ? authorEmail.trim() : '',
+    };
+
+    if (parentId && parseInt(parentId, 10) > 0) {
+      bodyData.parent = parseInt(parentId, 10);
+    }
+
+    const response = await fetch(`${WP_BASE_URL}/comments`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(bodyData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      let msg = data?.message || 'Failed to submit comment.';
+      msg = msg.replace(/<[^>]+>/g, '').trim();
+      throw new Error(msg);
+    }
+
+    return formatComment(data);
+  } catch (error) {
+    console.error('Error creating comment:', error);
+    throw error;
+  }
+};
+
+/**
  * Fetch static WordPress page by slug (e.g. privacy-policy, refund-policy, terms-of-service, advertise-with-us)
  */
 export const fetchPageBySlug = async (slug) => {

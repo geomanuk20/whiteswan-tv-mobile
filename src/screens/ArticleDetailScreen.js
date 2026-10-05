@@ -21,6 +21,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useBookmarks } from '../context/BookmarkContext';
 import { useAuth } from '../context/AuthContext';
 import { NewsCard } from '../components/NewsCard';
+import { CommentSection } from '../components/CommentSection';
 import { fetchPostById, fetchPostBySlug, fetchPosts, fetchAuthorPosts } from '../services/wpApi';
 import { shareArticleWithImage, shareToWhatsApp } from '../utils/shareHelper';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
@@ -500,6 +501,11 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
               </View>
             )}
           </View>
+
+          {/* WordPress Comment Section */}
+          {post?.id && (
+            <CommentSection postId={post.id} postTitle={post.title} />
+          )}
 
           {/* Related Articles Section */}
           {relatedPosts.length > 0 && (
