@@ -21,8 +21,8 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   }, [user?.avatar]);
 
   const isSmall = width < 360;
-  const logoWidth = isSmall ? 100 : width > 600 ? 145 : 120;
-  const logoHeight = isSmall ? 28 : width > 600 ? 38 : 32;
+  const logoWidth = isSmall ? 115 : width > 600 ? 165 : 138;
+  const logoHeight = isSmall ? 36 : width > 600 ? 48 : 40;
 
   const handleAccountPress = () => {
     if (onProfilePress) {
@@ -67,8 +67,8 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
       >
         <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
         <View style={styles.topRow}>
-          {/* Official Brand Logo with Crisp White Glass Pill Container */}
-          <View style={styles.brandLogoCard}>
+          {/* Official Brand Logo */}
+          <View style={styles.brandContainer}>
             <Image
               source={require('../../assets/logo.png')}
               style={{ width: logoWidth, height: logoHeight }}
@@ -183,18 +183,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 44,
   },
-  brandLogoCard: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
+  brandContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
   },
   actions: {
     flexDirection: 'row',
