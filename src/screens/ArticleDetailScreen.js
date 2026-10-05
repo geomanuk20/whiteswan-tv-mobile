@@ -196,15 +196,6 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
               color={bookmarked ? COLORS.primary : colors.text}
             />
           </TouchableOpacity>
-
-          {/* Share */}
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.inputBg }]}
-            onPress={handleShare}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="share-social-outline" size={20} color={colors.text} />
-          </TouchableOpacity>
         </View>
       </View>
 
