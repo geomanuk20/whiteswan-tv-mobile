@@ -204,13 +204,7 @@ export const PageDetailScreen = ({ route, navigation }) => {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={handleShare}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="share-social-outline" size={20} color={colors.text} />
-        </TouchableOpacity>
+        <View style={styles.actionBtn} />
       </View>
 
       {/* Loading Indicator */}
