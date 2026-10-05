@@ -2,7 +2,7 @@
   "expo": {
     "name": "Whiteswan TV News",
     "slug": "whiteswan-tv-news",
-    "version": "1.0.20",
+    "version": "1.0.21",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -35,7 +35,7 @@
     },
     "android": {
       "package": "com.whiteswantv.news",
-      "versionCode": 22,
+      "versionCode": 23,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
