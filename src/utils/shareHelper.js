@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { Share, Linking, Platform } from 'react-native';
+import { Share, Linking } from 'react-native';
 import { normalizeImageUrl } from '../services/wpApi';
 
 /**
@@ -42,7 +42,7 @@ export const buildWhatsAppShareText = (post) => {
   if (!post) return '';
   const title = post.title ? `*${post.title.trim()}*` : '*Whiteswan TV News*';
   const summary = getCleanSummary(post);
-  const url = post.link || 'https://whiteswantvnews.com';
+  const url = post.link || (post.id ? `https://whiteswantvnews.com/?p=${post.id}` : 'https://whiteswantvnews.com');
 
   if (summary && summary.length > 10 && !summary.includes(post.title)) {
     return `${title}\n\n${summary}\n\n🔗 *കൂടുതൽ വായിക്കുക (Read Full Story):*\n${url}`;
@@ -89,7 +89,7 @@ export const shareArticleWithImage = async (post) => {
   if (!post) return;
 
   const title = post.title || 'Whiteswan TV News';
-  const url = post.link || 'https://whiteswantvnews.com';
+  const url = post.link || (post.id ? `https://whiteswantvnews.com/?p=${post.id}` : 'https://whiteswantvnews.com');
   const shareMessage = buildWhatsAppShareText(post);
 
   let localFileUri = null;
@@ -136,6 +136,18 @@ export const shareArticleWithImage = async (post) => {
       console.log('Sharing.shareAsync fallback:', shareErr.message);
     }
   }
+
+  // Standard fallback
+  try {
+    await Share.share({
+      title,
+      message: shareMessage,
+      url,
+    });
+  } catch (e) {
+    console.error('Standard share error:', e);
+  }
+};
 
 /**
  * Share article to Facebook
