@@ -226,8 +226,8 @@ export const ProfileScreen = ({ navigation }) => {
       const res = await syncUserSubscription();
       if (res?.success && res?.isPremium) {
         Alert.alert(
-          '🎉 VIP Subscription Synced!',
-          res.message || 'Your VIP subscription from whiteswantvnews.com is active and synced with this device.',
+          '🎉 Premium Subscription Synced!',
+          res.message || 'Your Premium subscription from whiteswantvnews.com is active and synced with this device.',
           [{ text: 'Awesome!' }]
         );
       } else if (res?.success && !res?.isPremium) {
@@ -236,7 +236,7 @@ export const ProfileScreen = ({ navigation }) => {
           'We checked whiteswantvnews.com for your account, but no active subscription order was found.\n\nIf you recently subscribed, please ensure payment is complete or that you signed in with the same email.',
           [
             {
-              text: 'View VIP Plans',
+              text: 'View Premium Plans',
               onPress: () => navigation.navigate('PremiumPlans'),
             },
             {
@@ -917,7 +917,7 @@ export const ProfileScreen = ({ navigation }) => {
                   {user.isPremium ? (subDetails?.planName || 'Active Premium Member') : (orders.length > 0 ? `${orders.length} orders recorded` : 'View order history')}
                 </Text>
                 <View style={styles.tileFooterRow}>
-                  <Text style={styles.tileActionLink}>View Orders & VIP →</Text>
+                  <Text style={styles.tileActionLink}>View Orders & Plans →</Text>
                 </View>
               </TouchableOpacity>
 
@@ -1237,14 +1237,14 @@ export const ProfileScreen = ({ navigation }) => {
                   No orders recorded yet
                 </Text>
                 <Text style={{ color: colors.textSecondary, fontSize: 12, textAlign: 'center', marginTop: 4, marginBottom: 14 }}>
-                  All your past digital invoices, payments, and VIP plan purchases appear here.
+                  All your past digital invoices, payments, and Premium plan purchases appear here.
                 </Text>
                 <TouchableOpacity
                   style={[styles.loginBtn, { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingVertical: 10 }]}
                   onPress={() => navigation.navigate('PremiumPlans')}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.loginBtnText}>Browse VIP Plans</Text>
+                  <Text style={styles.loginBtnText}>Browse Premium Plans</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -2499,7 +2499,7 @@ export const ProfileScreen = ({ navigation }) => {
                   </View>
                   <View style={styles.orderDetailRow}>
                     <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Product / Access</Text>
-                    <Text style={{ color: colors.text, fontSize: 13, fontWeight: '700' }}>{selectedOrder.item || 'Premium VIP Digital Access'}</Text>
+                    <Text style={{ color: colors.text, fontSize: 13, fontWeight: '700' }}>{selectedOrder.item || 'Premium Digital Access'}</Text>
                   </View>
                 </View>
 

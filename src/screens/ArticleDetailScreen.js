@@ -420,7 +420,7 @@ export const ArticleDetailScreen = ({ route, navigation }) => {
                   Support Quality Journalism
                 </Text>
                 <Text style={[styles.articlePremiumDesc, { color: colors.textSecondary }]}>
-                  Get unlimited ad-free reading, exclusive investigative reports, and daily VIP features.
+                  Get unlimited ad-free reading, exclusive investigative reports, and daily premium features.
                 </Text>
               </View>
               <View style={styles.articlePremiumBtn}>

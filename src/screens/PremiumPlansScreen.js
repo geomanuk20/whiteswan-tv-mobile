@@ -246,8 +246,8 @@ export const PremiumPlansScreen = ({ navigation }) => {
       const res = await syncUserSubscription();
       if (res?.success && res?.isPremium) {
         Alert.alert(
-          '🎉 VIP Activated from Website!',
-          res.message || 'Your subscription from whiteswantvnews.com was verified and VIP benefits are now active!',
+          '🎉 Premium Activated from Website!',
+          res.message || 'Your subscription from whiteswantvnews.com was verified and Premium benefits are now active!',
           [{ text: 'Great!', onPress: () => navigation.goBack() }]
         );
       } else {
@@ -337,7 +337,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
     if (!isLoggedIn) {
       Alert.alert(
         'Sign In Required',
-        'Please sign in or create an account before subscribing so your Premium VIP benefits are linked to your profile.',
+        'Please sign in or create an account before subscribing so your Premium benefits are linked to your profile.',
         [
           {
             text: 'Sign In / Register',
@@ -381,7 +381,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
       if (result.success) {
         Alert.alert(
           'PhonePe Payment Initiated',
-          'Complete the payment in your UPI app. Once completed, tap below to activate your VIP membership.',
+          'Complete the payment in your UPI app. Once completed, tap below to activate your Premium membership.',
           [
             {
               text: 'I Have Completed Payment',
@@ -488,7 +488,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
                   Please sign in first
                 </Text>
                 <Text style={[styles.loginPromptSub, { color: colors.textSecondary }]}>
-                  Sign in or register to link your VIP subscription.
+                  Sign in or register to link your Premium subscription.
                 </Text>
               </View>
               <View style={styles.loginBadgeBtn}>
@@ -549,7 +549,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
 
               {/* VIP Benefits List */}
               <View style={styles.vipPerksContainer}>
-                <Text style={[styles.vipPerksTitle, { color: colors.text }]}>Active VIP Benefits:</Text>
+                <Text style={[styles.vipPerksTitle, { color: colors.text }]}>Active Premium Benefits:</Text>
                 {[
                   'Unlimited reading on all investigative stories',
                   '100% Ad-light & fast browsing experience',
@@ -569,7 +569,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
               <View style={styles.exploreBadgeRow}>
                 <Ionicons name="diamond" size={18} color="#00A3E8" />
                 <Text style={[styles.exploreSectionTitle, { color: colors.text }]}>
-                  Explore Other VIP Plans
+                  Explore Other Premium Plans
                 </Text>
               </View>
               <Text style={[styles.exploreSectionSub, { color: colors.textSecondary }]}>
@@ -928,7 +928,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
                 <>
                   <Ionicons name="checkmark-done-circle" size={20} color="#FFFFFF" />
                   <Text style={styles.activateVipBtnText}>
-                    I Have Paid • Activate VIP Access
+                    I Have Paid • Activate Premium Access
                   </Text>
                 </>
               )}

@@ -66,7 +66,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
 
         {/* Action Buttons */}
         <View style={styles.actions}>
-          {/* VIP Badge for Subscribed User OR Subscribe Button for Non-Subscribed */}
+          {/* Premium Badge for Subscribed User OR Subscribe Button for Non-Subscribed */}
           {user?.isPremium || user?.role === 'Premium VIP' ? (
             <TouchableOpacity
               style={[styles.vipBadgeButton, { backgroundColor: COLORS.primary }]}
@@ -74,7 +74,7 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
               activeOpacity={0.8}
             >
               <Ionicons name="diamond" size={13} color="#FFFFFF" />
-              <Text style={styles.vipBadgeText}>VIP</Text>
+              <Text style={styles.vipBadgeText}>Premium</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
