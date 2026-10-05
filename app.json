@@ -2,7 +2,7 @@
   "expo": {
     "name": "Whiteswan TV News",
     "slug": "whiteswan-tv-news",
-    "version": "1.0.21",
+    "version": "1.0.22",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -36,7 +36,7 @@
     "scheme": "whiteswantv",
     "android": {
       "package": "com.whiteswantv.news",
-      "versionCode": 23,
+      "versionCode": 24,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -141,6 +141,16 @@
           "smallIcons": [
             "./assets/notification_icon.png"
           ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
         }
       ]
     ],
