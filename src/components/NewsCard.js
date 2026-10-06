@@ -135,14 +135,6 @@ export const NewsCard = ({
                   color={bookmarked ? COLORS.secondary : '#FFFFFF'}
                 />
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.iconCircle}
-                onPress={handleShare}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="share-social-outline" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -265,18 +257,6 @@ export const NewsCard = ({
                 name={bookmarked ? 'bookmark' : 'bookmark-outline'}
                 size={17}
                 color={bookmarked ? COLORS.primary : colors.textSecondary}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.compactActionBtn}
-              onPress={handleShare}
-              activeOpacity={0.6}
-            >
-              <Ionicons
-                name="share-social-outline"
-                size={17}
-                color={colors.textSecondary}
               />
             </TouchableOpacity>
           </View>
