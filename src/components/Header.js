@@ -166,9 +166,6 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
 };
 
 const styles = StyleSheet.create({
-  headerWrapper: {
-    width: '100%',
-  },
   headerBg: {
     width: '100%',
     overflow: 'hidden',
@@ -176,12 +173,6 @@ const styles = StyleSheet.create({
   overlay: {
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.sm + 4,
-  },
-  boldDividerLine: {
-    height: 3.5,
-    width: '100%',
-    marginTop: 6,
-    marginBottom: 4,
   },
   topRow: {
     flexDirection: 'row',
