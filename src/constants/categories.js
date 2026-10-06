@@ -27,7 +27,7 @@ export const DEFAULT_CATEGORIES = [
     id: 8872,
     name: 'Special Story',
     nameMl: 'സ്പെഷ്യൽ സ്റ്റോറി',
-    icon: 'sparkles-outline',
+    icon: 'ribbon-outline',
     color: '#F59E0B',
     image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=500&auto=format&fit=crop&q=80',
   },
