@@ -45,11 +45,12 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/header-bg.png')}
-      style={styles.headerBg}
-      resizeMode="cover"
-    >
+    <View style={styles.headerWrapper}>
+      <ImageBackground
+        source={require('../../assets/header-bg.png')}
+        style={styles.headerBg}
+        resizeMode="cover"
+      >
       <LinearGradient
         colors={
           isDarkMode
@@ -162,10 +163,17 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
         </View>
       </LinearGradient>
     </ImageBackground>
+
+    {/* Divider Line */}
+    <View style={[styles.boldDividerLine, { backgroundColor: isDarkMode ? '#334155' : '#D1D5DB' }]} />
+  </View>
   );
 };
 
 const styles = StyleSheet.create({
+  headerWrapper: {
+    width: '100%',
+  },
   headerBg: {
     width: '100%',
     overflow: 'hidden',
@@ -173,6 +181,12 @@ const styles = StyleSheet.create({
   overlay: {
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.sm + 4,
+  },
+  boldDividerLine: {
+    height: 3.5,
+    width: '100%',
+    marginTop: 6,
+    marginBottom: 4,
   },
   topRow: {
     flexDirection: 'row',
