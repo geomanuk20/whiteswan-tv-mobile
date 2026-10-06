@@ -219,8 +219,13 @@ export const HomeScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View>
-      {/* Top Gray Divider Line */}
-      <View style={[styles.topDivider, { backgroundColor: colors.border }]} />
+      {/* Top Gray Divider Line - Scrolls with feed and hides */}
+      <View
+        style={[
+          styles.topGrayLine,
+          { backgroundColor: isDarkMode ? '#1E293B' : '#E2E8F0' },
+        ]}
+      />
 
       {/* Breaking News Marquee */}
       {breakingNews.length > 0 && (
@@ -328,8 +333,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  topDivider: {
-    height: 1,
+  topGrayLine: {
+    height: 1.5,
     width: '100%',
     marginBottom: 6,
   },
