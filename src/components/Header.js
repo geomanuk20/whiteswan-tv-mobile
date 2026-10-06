@@ -45,12 +45,11 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
   };
 
   return (
-    <View style={styles.headerWrapper}>
-      <ImageBackground
-        source={require('../../assets/header-bg.png')}
-        style={styles.headerBg}
-        resizeMode="cover"
-      >
+    <ImageBackground
+      source={require('../../assets/header-bg.png')}
+      style={styles.headerBg}
+      resizeMode="cover"
+    >
       <LinearGradient
         colors={
           isDarkMode
@@ -163,10 +162,6 @@ export const Header = ({ onSearchPress, onPremiumPress, onProfilePress }) => {
         </View>
       </LinearGradient>
     </ImageBackground>
-
-    {/* Divider Line */}
-    <View style={[styles.boldDividerLine, { backgroundColor: isDarkMode ? '#334155' : '#D1D5DB' }]} />
-  </View>
   );
 };
 
