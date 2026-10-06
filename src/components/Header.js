@@ -173,8 +173,6 @@ const styles = StyleSheet.create({
   overlay: {
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.sm + 4,
-    borderBottomWidth: 1.5,
-    borderBottomColor: 'rgba(0, 163, 232, 0.35)',
   },
   topRow: {
     flexDirection: 'row',
