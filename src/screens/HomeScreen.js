@@ -8,6 +8,7 @@ import {
   Text,
   AppState,
   useWindowDimensions,
+  Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,6 +40,48 @@ export const HomeScreen = ({ navigation }) => {
 
   const isFirstMount = useRef(true);
   const appState = useRef(AppState.currentState);
+
+  // Auto-hide header on scroll state & animation
+  const headerTranslateY = useRef(new Animated.Value(0)).current;
+  const lastScrollY = useRef(0);
+  const isHeaderHidden = useRef(false);
+  const [headerHeight, setHeaderHeight] = useState(115);
+
+  const handleScroll = useCallback((event) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    const diff = currentY - lastScrollY.current;
+
+    if (currentY <= 15) {
+      if (isHeaderHidden.current) {
+        isHeaderHidden.current = false;
+        Animated.timing(headerTranslateY, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    } else if (diff > 10 && currentY > 60) {
+      if (!isHeaderHidden.current) {
+        isHeaderHidden.current = true;
+        Animated.timing(headerTranslateY, {
+          toValue: -(headerHeight + 20),
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    } else if (diff < -12) {
+      if (isHeaderHidden.current) {
+        isHeaderHidden.current = false;
+        Animated.timing(headerTranslateY, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    }
+
+    lastScrollY.current = currentY;
+  }, [headerHeight, headerTranslateY]);
 
   // Silent background revalidation without screen flashing or scroll jumping
   const silentRevalidate = useCallback(async (catId = selectedCategory) => {
@@ -219,14 +262,6 @@ export const HomeScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View>
-      {/* Top Gray Divider Line - Scrolls with feed and hides */}
-      <View
-        style={[
-          styles.topGrayLine,
-          { backgroundColor: isDarkMode ? '#1E293B' : '#E2E8F0' },
-        ]}
-      />
-
       {/* Breaking News Marquee */}
       {breakingNews.length > 0 && (
         <BreakingNewsTicker
@@ -274,24 +309,41 @@ export const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* App Header */}
-      <Header
-        onSearchPress={handleSearchPress}
-        onProfilePress={() => navigation.navigate('Account')}
-        onPremiumPress={() => navigation.navigate('PremiumPlans')}
-      />
+      {/* Animated App Header (Auto-hides smoothly on scroll) */}
+      <Animated.View
+        onLayout={(e) => {
+          const h = e.nativeEvent.layout.height;
+          if (h && Math.abs(h - headerHeight) > 2) {
+            setHeaderHeight(h);
+          }
+        }}
+        style={[
+          styles.animatedHeaderContainer,
+          {
+            transform: [{ translateY: headerTranslateY }],
+          },
+        ]}
+      >
+        <Header
+          onSearchPress={handleSearchPress}
+          onProfilePress={() => navigation.navigate('Account')}
+          onPremiumPress={() => navigation.navigate('PremiumPlans')}
+        />
+      </Animated.View>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
+        <View style={[styles.loadingContainer, { paddingTop: headerHeight + 10 }]}>
           <LoadingSkeleton type="hero" />
           <LoadingSkeleton count={3} />
         </View>
       ) : error && posts.length === 0 ? (
-        <EmptyState
-          title="No News Available"
-          subtitle={error}
-          onRetry={loadInitialData}
-        />
+        <View style={{ paddingTop: headerHeight, flex: 1 }}>
+          <EmptyState
+            title="No News Available"
+            subtitle={error}
+            onRetry={loadInitialData}
+          />
+        </View>
       ) : (
         <FlatList
           data={listPosts}
@@ -307,17 +359,20 @@ export const HomeScreen = ({ navigation }) => {
           ListFooterComponent={renderFooter}
           onEndReached={loadMorePosts}
           onEndReachedThreshold={0.5}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
               colors={[COLORS.primary]}
               tintColor={COLORS.primary}
+              progressViewOffset={headerHeight}
             />
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
-            { paddingBottom: 20 },
+            { paddingTop: headerHeight + 4, paddingBottom: 20 },
             isTablet && { maxWidth: 760, alignSelf: 'center', width: '100%' },
           ]}
         />
@@ -333,10 +388,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  topGrayLine: {
-    height: 1.5,
-    width: '100%',
-    marginBottom: 6,
+  animatedHeaderContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    elevation: 4,
   },
   loadingContainer: {
     paddingTop: 10,
