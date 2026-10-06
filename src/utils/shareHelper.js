@@ -1,7 +1,4 @@
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { Share, Linking } from 'react-native';
-import { normalizeImageUrl } from '../services/wpApi';
 
 /**
  * Extract clean readable summary text from post excerpt or content
@@ -28,7 +25,7 @@ export const getCleanSummary = (post) => {
     .replace(/\s+/g, ' ')
     .trim();
 
-  // Truncate to ~180 characters for optimal WhatsApp readability
+  // Truncate to ~180 characters for optimal readability
   if (clean.length > 200) {
     return clean.slice(0, 195).trim() + '...';
   }
@@ -36,7 +33,7 @@ export const getCleanSummary = (post) => {
 };
 
 /**
- * Build rich WhatsApp share text including Title, Content summary, and Link
+ * Build rich share text including Title, Content summary, and Link
  */
 export const buildWhatsAppShareText = (post) => {
   if (!post) return '';
@@ -44,15 +41,16 @@ export const buildWhatsAppShareText = (post) => {
   const summary = getCleanSummary(post);
   const url = post.link || (post.id ? `https://whiteswantvnews.com/?p=${post.id}` : 'https://whiteswantvnews.com');
 
+  let text = `${title}\n\n`;
   if (summary && summary.length > 10 && !summary.includes(post.title)) {
-    return `${title}\n\n${summary}\n\n🔗 *കൂടുതൽ വായിക്കുക (Read Full Story):*\n${url}`;
+    text += `${summary}\n\n`;
   }
-
-  return `${title}\n\n🔗 *കൂടുതൽ വായിക്കുക (Read Full Story):*\n${url}`;
+  text += `🔗 *കൂടുതൽ വായിക്കുക (Read Full Story):*\n${url}`;
+  return text;
 };
 
 /**
- * Share article to WhatsApp (with content summary + direct link + image fallback)
+ * Share article to WhatsApp (with content summary + direct link + rich preview)
  */
 export const shareToWhatsApp = async (post) => {
   if (!post) return;
@@ -83,7 +81,7 @@ export const shareToWhatsApp = async (post) => {
 };
 
 /**
- * Share article with high-quality news image attached (WhatsApp, Telegram, etc.)
+ * Share article with Title + Summary + Live Link + Image Preview
  */
 export const shareArticleWithImage = async (post) => {
   if (!post) return;
@@ -92,60 +90,20 @@ export const shareArticleWithImage = async (post) => {
   const url = post.link || (post.id ? `https://whiteswantvnews.com/?p=${post.id}` : 'https://whiteswantvnews.com');
   const shareMessage = buildWhatsAppShareText(post);
 
-  let localFileUri = null;
-
   try {
-    const rawImage =
-      post.featuredImage ||
-      'https://whiteswantvnews.com/wp-content/uploads/2025/12/download.png';
-    const validImageUrl = normalizeImageUrl(rawImage);
-
-    if (
-      validImageUrl &&
-      typeof validImageUrl === 'string' &&
-      validImageUrl.startsWith('http')
-    ) {
-      const sanitizedId = String(post.id || Date.now()).replace(/[^a-zA-Z0-9_-]/g, '_');
-      const filename = `news_${sanitizedId}_share.jpg`;
-      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
-
-      const fileInfo = await FileSystem.getInfoAsync(fileUri);
-      if (!fileInfo.exists) {
-        const downloadRes = await FileSystem.downloadAsync(validImageUrl, fileUri);
-        if (downloadRes.status === 200) {
-          localFileUri = downloadRes.uri;
-        }
-      } else {
-        localFileUri = fileUri;
+    await Share.share(
+      {
+        title,
+        message: shareMessage,
+        url,
+      },
+      {
+        dialogTitle: `Share: ${title}`,
+        subject: title,
       }
-    }
-  } catch (err) {
-    console.log('Image download for share error:', err.message);
-  }
-
-  // If local image is cached and expo-sharing is available, share image directly
-  if (localFileUri && (await Sharing.isAvailableAsync())) {
-    try {
-      await Sharing.shareAsync(localFileUri, {
-        mimeType: 'image/jpeg',
-        dialogTitle: title,
-        UTI: 'public.jpeg',
-      });
-      return;
-    } catch (shareErr) {
-      console.log('Sharing.shareAsync fallback:', shareErr.message);
-    }
-  }
-
-  // Standard fallback
-  try {
-    await Share.share({
-      title,
-      message: shareMessage,
-      url,
-    });
+    );
   } catch (e) {
-    console.error('Standard share error:', e);
+    console.error('Share error:', e);
   }
 };
 
