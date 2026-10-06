@@ -219,6 +219,9 @@ export const HomeScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View>
+      {/* Top Gray Divider Line */}
+      <View style={[styles.topDivider, { backgroundColor: colors.border }]} />
+
       {/* Breaking News Marquee */}
       {breakingNews.length > 0 && (
         <BreakingNewsTicker
@@ -324,6 +327,11 @@ export const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  topDivider: {
+    height: 1,
+    width: '100%',
+    marginBottom: 6,
   },
   loadingContainer: {
     paddingTop: 10,
