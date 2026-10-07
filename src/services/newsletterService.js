@@ -88,7 +88,7 @@ export const shouldShowNewsletterPopup = async (cooldownMinutes = 30) => {
 export const markPopupDismissed = async () => {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.DISMISSED_TIME, Date.now().toString());
-  } catch (e) {}
+  } catch (e) { }
 };
 
 /**
@@ -100,7 +100,7 @@ export const markUserSubscribed = async (email = '') => {
     if (email) {
       await AsyncStorage.setItem(STORAGE_KEYS.SAVED_EMAIL, email);
     }
-  } catch (e) {}
+  } catch (e) { }
 };
 
 /**

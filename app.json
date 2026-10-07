@@ -2,7 +2,7 @@
   "expo": {
     "name": "Whiteswan TV News",
     "slug": "whiteswan-tv-news",
-    "version": "1.0.24",
+    "version": "1.0.25",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -37,14 +37,14 @@
     "scheme": "whiteswantv",
     "android": {
       "package": "com.whiteswantv.news",
-      "versionCode": 26,
+      "versionCode": 27,
       "splash": {
         "image": "./assets/splash-icon.png",
         "resizeMode": "contain",
         "backgroundColor": "#022A62"
       },
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
+        "backgroundColor": "#022A62",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -141,6 +141,18 @@
       "expo-asset",
       "expo-font",
       [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#022A62",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#022A62"
+          },
+          "imageWidth": 200
+        }
+      ],
+      [
         "onesignal-expo-plugin",
         {
           "mode": "development",
@@ -153,10 +165,9 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 36,
-            "targetSdkVersion": 36,
-            "buildToolsVersion": "36.0.0",
-            "enableProguardInReleaseBuilds": true
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]
