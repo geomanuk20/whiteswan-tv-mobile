@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Whiteswan TV News",
-    "slug": "whiteswan-tv-news",
+    "slug": "whiteswan",
     "version": "1.0.25",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -172,10 +172,10 @@
         }
       ]
     ],
-    "owner": "geomanu",
+    "owner": "technical-49s-team",
     "extra": {
       "eas": {
-        "projectId": "ff4e4a8e-ebce-48d6-8aef-058ed01e5cec"
+        "projectId": "a8498d74-2b85-40c5-add5-0a84577576df"
       }
     }
   }
