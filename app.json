@@ -8,8 +8,9 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#000000",
-      "resizeMode": "contain"
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#022A62"
     },
     "ios": {
       "supportsTablet": true,
@@ -37,6 +38,11 @@
     "android": {
       "package": "com.whiteswantv.news",
       "versionCode": 26,
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#022A62"
+      },
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
