@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { NavigationContainer, DefaultTheme, DarkTheme, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { navigationRef } from './navigationService';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -133,7 +134,6 @@ const BottomTabNavigator = () => {
 
 export const AppNavigator = () => {
   const { colors, isDarkMode } = useTheme();
-  const navigationRef = useNavigationContainerRef();
   const baseTheme = isDarkMode ? DarkTheme : DefaultTheme;
 
   React.useEffect(() => {

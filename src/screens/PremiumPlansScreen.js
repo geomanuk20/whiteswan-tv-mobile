@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useBookmarks } from '../context/BookmarkContext';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import {
   launchPhonePePayment,
@@ -85,6 +86,7 @@ export const PremiumPlansScreen = ({ navigation }) => {
   const { width } = useWindowDimensions();
   const { colors, isDarkMode } = useTheme();
   const { user, isLoggedIn, updateProfile, syncUserSubscription } = useAuth();
+  const { showSignInModal } = useBookmarks();
 
   const [plans, setPlans] = useState(DEFAULT_PLANS);
   const [selectedPlanId, setSelectedPlanId] = useState('yearly');
@@ -231,14 +233,14 @@ export const PremiumPlansScreen = ({ navigation }) => {
 
   const handleSyncWebsiteSubscription = async () => {
     if (!isLoggedIn) {
-      Alert.alert(
-        'Sign In Required',
-        'Please sign in to your WordPress account first to check and sync your website subscriptions.',
-        [
-          { text: 'Sign In', onPress: () => navigation.navigate('Login') },
-          { text: 'Cancel', style: 'cancel' },
-        ]
-      );
+      if (showSignInModal) {
+        showSignInModal(
+          'Sign In Required',
+          'Please sign in to your WordPress account first to check and sync your website subscriptions.'
+        );
+      } else {
+        navigation.navigate('Login');
+      }
       return;
     }
     try {
@@ -335,20 +337,14 @@ export const PremiumPlansScreen = ({ navigation }) => {
 
     // 1. Enforce user login first
     if (!isLoggedIn) {
-      Alert.alert(
-        'Sign In Required',
-        'Please sign in or create an account before subscribing so your Premium benefits are linked to your profile.',
-        [
-          {
-            text: 'Sign In / Register',
-            onPress: () => navigation.navigate('Login'),
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ]
-      );
+      if (showSignInModal) {
+        showSignInModal(
+          'Sign In Required',
+          'Please sign in or create an account before subscribing so your Premium benefits are linked to your profile.'
+        );
+      } else {
+        navigation.navigate('Login');
+      }
       return;
     }
 

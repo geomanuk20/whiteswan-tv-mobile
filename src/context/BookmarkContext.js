@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from './AuthContext';
+import { SignInPromptModal } from '../components/SignInPromptModal';
+import { navigationRef } from '../navigation/navigationService';
 
 const BookmarkContext = createContext();
 
@@ -11,6 +12,13 @@ export const BookmarkProvider = ({ children }) => {
   const { user, isLoggedIn } = useAuth();
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Custom Sign-In Modal State
+  const [modalConfig, setModalConfig] = useState({
+    visible: false,
+    title: 'Sign In Required',
+    subtitle: 'Please sign in or create an account to save news articles to your personal reading list.',
+  });
 
   // Storage key is scoped to the logged-in user
   const storageKey = user?.id
@@ -47,24 +55,31 @@ export const BookmarkProvider = ({ children }) => {
     return bookmarks.some((item) => item.id === postId);
   };
 
-  const toggleBookmark = async (post, navigation) => {
-    // Enforce login requirement
-    if (!isLoggedIn || !user) {
-      Alert.alert(
-        'Sign In Required',
+  const showSignInModal = (customTitle, customSubtitle) => {
+    setModalConfig({
+      visible: true,
+      title: customTitle || 'Sign In Required',
+      subtitle:
+        customSubtitle ||
         'Please sign in or create an account to save news articles to your personal reading list.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Sign In / Register',
-            onPress: () => {
-              if (navigation) {
-                navigation.navigate('Login');
-              }
-            },
-          },
-        ]
-      );
+    });
+  };
+
+  const hideSignInModal = () => {
+    setModalConfig((prev) => ({ ...prev, visible: false }));
+  };
+
+  const handleModalSignIn = () => {
+    hideSignInModal();
+    if (navigationRef?.isReady?.()) {
+      navigationRef.navigate('Login');
+    }
+  };
+
+  const toggleBookmark = async (post, navigation) => {
+    // Enforce login requirement with custom suitable modal
+    if (!isLoggedIn || !user) {
+      showSignInModal();
       return false;
     }
 
@@ -129,9 +144,18 @@ export const BookmarkProvider = ({ children }) => {
         toggleBookmark,
         removeBookmark,
         clearAllBookmarks,
+        showSignInModal,
+        hideSignInModal,
       }}
     >
       {children}
+      <SignInPromptModal
+        visible={modalConfig.visible}
+        title={modalConfig.title}
+        subtitle={modalConfig.subtitle}
+        onClose={hideSignInModal}
+        onSignIn={handleModalSignIn}
+      />
     </BookmarkContext.Provider>
   );
 };
