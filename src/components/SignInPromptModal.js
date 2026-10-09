@@ -124,21 +124,6 @@ export const SignInPromptModal = ({
                 />
               </TouchableOpacity>
 
-              {/* Glowing Icon Header */}
-              <View style={styles.iconContainer}>
-                <LinearGradient
-                  colors={['#00A3E8', '#022A62']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.iconGradient}
-                >
-                  <Ionicons name="bookmark" size={28} color="#FFFFFF" />
-                </LinearGradient>
-                <View style={styles.sparkleBadge}>
-                  <Ionicons name="sparkles" size={12} color="#00A3E8" />
-                </View>
-              </View>
-
               {/* Title & Subtitle */}
               <Text
                 style={[
@@ -223,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1.5,
     paddingHorizontal: 22,
-    paddingTop: 28,
+    paddingTop: 30,
     paddingBottom: 22,
     alignItems: 'center',
     shadowColor: '#00A3E8',
@@ -244,45 +229,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 10,
   },
-  iconContainer: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  iconGradient: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#00A3E8',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  sparkleBadge: {
-    position: 'absolute',
-    top: -3,
-    right: -3,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
   title: {
     fontSize: 21,
     fontWeight: '800',
     letterSpacing: -0.3,
     textAlign: 'center',
+    marginTop: 4,
     marginBottom: 8,
   },
   subtitle: {
