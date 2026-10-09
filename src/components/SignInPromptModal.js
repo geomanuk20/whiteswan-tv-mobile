@@ -19,6 +19,7 @@ export const SignInPromptModal = ({
   visible = false,
   onClose,
   onSignIn,
+  onRegister,
   title = 'Sign In Required',
   subtitle = 'Please sign in or create an account to save news articles to your personal reading list.',
 }) => {
@@ -60,6 +61,17 @@ export const SignInPromptModal = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (_) {}
     if (onSignIn) {
+      onSignIn();
+    }
+  };
+
+  const handleRegisterPress = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (_) {}
+    if (onRegister) {
+      onRegister();
+    } else if (onSignIn) {
       onSignIn();
     }
   };
@@ -145,7 +157,7 @@ export const SignInPromptModal = ({
 
               {/* Action Buttons */}
               <View style={styles.buttonContainer}>
-                {/* Primary: Sign In / Register */}
+                {/* Primary: Sign In */}
                 <TouchableOpacity
                   style={styles.signInButton}
                   onPress={handleSignInPress}
@@ -159,13 +171,13 @@ export const SignInPromptModal = ({
                   >
                     <Ionicons name="log-in-outline" size={18} color="#FFFFFF" />
                     <Text style={styles.signInButtonText}>
-                      Sign In / Register
+                      Sign In
                     </Text>
                     <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
                   </LinearGradient>
                 </TouchableOpacity>
 
-                {/* Secondary: Cancel / Later */}
+                {/* Secondary: Cancel */}
                 <TouchableOpacity
                   style={[
                     styles.cancelButton,
@@ -184,7 +196,21 @@ export const SignInPromptModal = ({
                       { color: isDarkMode ? '#94A3B8' : '#64748B' },
                     ]}
                   >
-                    Maybe Later
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Register Link */}
+                <TouchableOpacity
+                  style={styles.registerLink}
+                  onPress={handleRegisterPress}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.registerLinkText, { color: isDarkMode ? '#94A3B8' : '#64748B' }]}>
+                    Don't have an account?{' '}
+                    <Text style={[styles.registerLinkBold, { color: COLORS.primary }]}>
+                      Register
+                    </Text>
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -283,5 +309,17 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  registerLink: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    marginTop: 2,
+  },
+  registerLinkText: {
+    fontSize: 13,
+  },
+  registerLinkBold: {
+    fontWeight: '700',
   },
 });

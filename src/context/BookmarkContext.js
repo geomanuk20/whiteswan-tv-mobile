@@ -76,6 +76,13 @@ export const BookmarkProvider = ({ children }) => {
     }
   };
 
+  const handleModalRegister = () => {
+    hideSignInModal();
+    if (navigationRef?.isReady?.()) {
+      navigationRef.navigate('Register');
+    }
+  };
+
   const toggleBookmark = async (post, navigation) => {
     // Enforce login requirement with custom suitable modal
     if (!isLoggedIn || !user) {
@@ -155,6 +162,7 @@ export const BookmarkProvider = ({ children }) => {
         subtitle={modalConfig.subtitle}
         onClose={hideSignInModal}
         onSignIn={handleModalSignIn}
+        onRegister={handleModalRegister}
       />
     </BookmarkContext.Provider>
   );
