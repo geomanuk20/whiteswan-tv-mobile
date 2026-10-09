@@ -70,8 +70,6 @@ export const SignInPromptModal = ({
     }
   };
 
-  const isSmallScreen = width < 360;
-
   return (
     <Modal
       transparent
@@ -102,7 +100,7 @@ export const SignInPromptModal = ({
                     ? 'rgba(255, 255, 255, 0.12)'
                     : 'rgba(0, 163, 232, 0.18)',
                   transform: [{ scale: scaleAnim }],
-                  maxWidth: Math.min(width - 40, 390),
+                  maxWidth: Math.min(width - 44, 380),
                 },
               ]}
             >
@@ -159,63 +157,6 @@ export const SignInPromptModal = ({
               >
                 {subtitle}
               </Text>
-
-              {/* Features List */}
-              <View
-                style={[
-                  styles.featuresBox,
-                  {
-                    backgroundColor: isDarkMode
-                      ? 'rgba(15, 23, 42, 0.6)'
-                      : '#F8FAFC',
-                    borderColor: isDarkMode
-                      ? 'rgba(255, 255, 255, 0.06)'
-                      : 'rgba(0, 0, 0, 0.06)',
-                  },
-                ]}
-              >
-                <View style={styles.featureRow}>
-                  <View style={[styles.featureDot, { backgroundColor: '#00A3E8' }]}>
-                    <Ionicons name="checkmark" size={12} color="#FFFFFF" />
-                  </View>
-                  <Text
-                    style={[
-                      styles.featureText,
-                      { color: isDarkMode ? '#CBD5E1' : '#334155' },
-                    ]}
-                  >
-                    Save articles to read offline anytime
-                  </Text>
-                </View>
-
-                <View style={styles.featureRow}>
-                  <View style={[styles.featureDot, { backgroundColor: '#00A3E8' }]}>
-                    <Ionicons name="checkmark" size={12} color="#FFFFFF" />
-                  </View>
-                  <Text
-                    style={[
-                      styles.featureText,
-                      { color: isDarkMode ? '#CBD5E1' : '#334155' },
-                    ]}
-                  >
-                    Sync reading list across your devices
-                  </Text>
-                </View>
-
-                <View style={styles.featureRow}>
-                  <View style={[styles.featureDot, { backgroundColor: '#00A3E8' }]}>
-                    <Ionicons name="checkmark" size={12} color="#FFFFFF" />
-                  </View>
-                  <Text
-                    style={[
-                      styles.featureText,
-                      { color: isDarkMode ? '#CBD5E1' : '#334155' },
-                    ]}
-                  >
-                    Engage & post comments on stories
-                  </Text>
-                </View>
-              </View>
 
               {/* Action Buttons */}
               <View style={styles.buttonContainer}>
@@ -282,7 +223,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1.5,
     paddingHorizontal: 22,
-    paddingTop: 26,
+    paddingTop: 28,
     paddingBottom: 22,
     alignItems: 'center',
     shadowColor: '#00A3E8',
@@ -338,44 +279,18 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   title: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '800',
     letterSpacing: -0.3,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 13.5,
-    lineHeight: 20,
+    fontSize: 14,
+    lineHeight: 21,
     textAlign: 'center',
-    marginBottom: 18,
-    paddingHorizontal: 6,
-  },
-  featuresBox: {
-    width: '100%',
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 20,
-    gap: 10,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  featureDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    flex: 1,
+    marginBottom: 24,
+    paddingHorizontal: 10,
   },
   buttonContainer: {
     width: '100%',
@@ -407,7 +322,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     width: '100%',
-    paddingVertical: 12,
+    paddingVertical: 13,
     borderRadius: RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
