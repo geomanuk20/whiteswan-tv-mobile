@@ -1,42 +1,73 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { YOUTUBE_CHANNELS } from '../constants/channels.js';
 
-const CACHE_KEY = '@ws_youtube_videos_v2';
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache for fresh news updates
+const CACHE_KEY = '@ws_youtube_videos_v3';
+const CACHE_TTL = 3 * 60 * 1000; // 3 minutes cache for fresh news updates
 
 /**
  * Classify if a video is published Today or Yesterday based on relative text or date
  */
 export const classifyVideoTimeAgo = (timeAgoText) => {
-  if (!timeAgoText) {
+  if (!timeAgoText || typeof timeAgoText !== 'string') {
     return { isToday: false, isYesterday: false, dateLabel: 'LATEST' };
   }
-  const lower = timeAgoText.toLowerCase();
+  const lower = timeAgoText.toLowerCase().trim();
 
-  if (
+  // 1. Explicitly check for days / weeks / months / years / yesterday (Strictly NOT Today)
+  // Handles strings like: "Streamed 1 day ago", "Streamed 2 days ago", "1 day ago", "yesterday", "2 days ago", "1 week ago", "3 months ago", etc.
+  const isOlder =
+    lower.includes('day') ||
+    lower.includes('yesterday') ||
+    lower.includes('week') ||
+    lower.includes('month') ||
+    lower.includes('year') ||
+    /\b\d+\s*d\b/i.test(lower) ||
+    /\b\d+\s*w\b/i.test(lower) ||
+    /\b\d+\s*mo\b/i.test(lower) ||
+    /\b\d+\s*y\b/i.test(lower);
+
+  if (isOlder) {
+    const isYesterday =
+      lower.includes('1 day') ||
+      lower.includes('yesterday') ||
+      /\b1\s*d(?:ay)?\b/i.test(lower);
+
+    return {
+      isToday: false,
+      isYesterday,
+      dateLabel: isYesterday ? 'YESTERDAY' : timeAgoText.toUpperCase(),
+    };
+  }
+
+  // 2. Explicitly check for Today indicators (hours, minutes, seconds, just now, watching now, live now)
+  // Handles strings like: "3 hours ago", "Streamed 2 hours ago", "45 minutes ago", "Just now", "Premiered 1 hour ago", "Live now"
+  const isToday =
     lower.includes('second') ||
     lower.includes('minute') ||
     lower.includes('min') ||
     lower.includes('hour') ||
+    lower.includes('hr') ||
     lower.includes('h ago') ||
     lower.includes('m ago') ||
+    lower.includes('s ago') ||
     lower.includes('just now') ||
-    lower.includes('streamed') ||
-    lower.includes('today')
-  ) {
-    return { isToday: true, isYesterday: false, dateLabel: 'TODAY' };
+    lower.includes('today') ||
+    lower.includes('watching now') ||
+    lower.includes('live now');
+
+  if (isToday) {
+    return {
+      isToday: true,
+      isYesterday: false,
+      dateLabel: 'TODAY',
+    };
   }
 
-  if (
-    lower.includes('1 day') ||
-    lower.includes('yesterday') ||
-    lower.includes('24 hour') ||
-    lower.includes('1d ago')
-  ) {
-    return { isToday: false, isYesterday: true, dateLabel: 'YESTERDAY' };
-  }
-
-  return { isToday: false, isYesterday: false, dateLabel: timeAgoText.toUpperCase() };
+  return {
+    isToday: false,
+    isYesterday: false,
+    dateLabel: timeAgoText.toUpperCase(),
+  };
 };
 
 /**
@@ -130,7 +161,7 @@ const fetchVideosFromHandle = async (channel) => {
           id: videoId,
           videoId,
           title,
-          timeAgo: timeAgo || 'Today',
+          timeAgo: timeAgo || 'Latest',
           dateLabel,
           isToday,
           isYesterday,
@@ -154,7 +185,7 @@ const fetchVideosFromHandle = async (channel) => {
           id: videoId,
           videoId,
           title,
-          timeAgo: timeAgo || 'Today',
+          timeAgo: timeAgo || 'Latest',
           dateLabel,
           isToday,
           isYesterday,
@@ -203,13 +234,33 @@ const fetchVideosFromRss = async (channel) => {
 
       const publishedMatch = entry.match(/<published>(.*?)<\/published>/);
       const publishedStr = publishedMatch ? publishedMatch[1].trim() : '';
-      const publishedDate = publishedStr ? new Date(publishedStr) : new Date();
+      const publishedDate = publishedStr ? new Date(publishedStr) : null;
 
-      const now = new Date();
-      const diffHours = Math.floor((now.getTime() - publishedDate.getTime()) / (1000 * 3600));
-      const isToday = diffHours < 24;
-      const isYesterday = diffHours >= 24 && diffHours < 48;
-      const timeAgo = isToday ? (diffHours < 1 ? 'Just now' : `${diffHours}h ago`) : isYesterday ? 'Yesterday' : `${Math.floor(diffHours/24)}d ago`;
+      let isToday = false;
+      let isYesterday = false;
+      let timeAgo = 'Latest';
+
+      if (publishedDate && !isNaN(publishedDate.getTime())) {
+        const now = new Date();
+        const diffMs = now.getTime() - publishedDate.getTime();
+        const diffHours = Math.floor(diffMs / (1000 * 3600));
+
+        const isSameCalendarDay =
+          now.getFullYear() === publishedDate.getFullYear() &&
+          now.getMonth() === publishedDate.getMonth() &&
+          now.getDate() === publishedDate.getDate();
+
+        if (diffHours < 20 || (isSameCalendarDay && diffHours < 24)) {
+          isToday = true;
+          timeAgo = diffHours < 1 ? 'Just now' : `${diffHours}h ago`;
+        } else if (diffHours >= 20 && diffHours < 44) {
+          isYesterday = true;
+          timeAgo = 'Yesterday';
+        } else {
+          const days = Math.max(2, Math.floor(diffHours / 24));
+          timeAgo = `${days}d ago`;
+        }
+      }
 
       return {
         id: videoId,

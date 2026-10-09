@@ -99,9 +99,8 @@ export const LiveTVScreen = ({ navigation }) => {
     }
   };
 
-  // Only Today's videos
-  const todayVideos = videos.filter((v) => v.isToday);
-  const displayedVideos = todayVideos.length > 0 ? todayVideos : videos.slice(0, 4);
+  // Only Today's videos (Strict filter: Never show yesterday's or older videos)
+  const displayedVideos = videos.filter((v) => v.isToday === true);
 
   // Define the platform sections
   const SECTIONS = [
